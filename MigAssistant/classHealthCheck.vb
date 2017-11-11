@@ -1,4 +1,3 @@
-Imports System
 Imports System.Threading
 
 Public Class classHealthCheck
@@ -23,16 +22,19 @@ Public Class classHealthCheck
             Return _bln_HealthCheckInProgress
         End Get
     End Property
+
     Public ReadOnly Property ExitCode() As Integer
         Get
             Return _int_HealthCheckExitCode
         End Get
     End Property
+
     Public ReadOnly Property Progress() As String
         Get
             Return _str_HealthCheckProgress
         End Get
     End Property
+
     Public ReadOnly Property PercentComplete() As Integer
         Get
             Return _int_HealthCheckPercentComplete
@@ -44,6 +46,7 @@ Public Class classHealthCheck
 #Region "Events"
 
     Public Event ProgressUpdate()
+
     Public Event HealthCheckFinished()
 
 #End Region
@@ -121,7 +124,6 @@ Public Class classHealthCheck
             End If
             _process.Close()
             ' _thread = Nothing
-
         Catch ex As Exception
 
         End Try

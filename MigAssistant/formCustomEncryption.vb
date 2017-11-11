@@ -49,4 +49,5 @@ Public Class formCustomEncryption
         End Select
 
     End Sub
+
 End Class

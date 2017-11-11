@@ -1,10 +1,10 @@
+Imports System.Configuration
 Imports System.IO
 Imports System.Security.Cryptography
 Imports System.Text
 Imports System.Text.RegularExpressions
-Imports System.Configuration
 
-' A simple, string-oriented wrapper class for encryption functions, including 
+' A simple, string-oriented wrapper class for encryption functions, including
 ' Hashing, Symmetric Encryption, and Asymmetric Encryption.
 '
 '  Jeff Atwood
@@ -15,10 +15,10 @@ Namespace Encryption
 #Region "  Hash"
 
     ''' <summary>
-    ''' Hash functions are fundamental to modern cryptography. These functions map binary 
-    ''' strings of an arbitrary length to small binary strings of a fixed length, known as 
+    ''' Hash functions are fundamental to modern cryptography. These functions map binary
+    ''' strings of an arbitrary length to small binary strings of a fixed length, known as
     ''' hash values. A cryptographic hash function has the property that it is computationally
-    ''' infeasible to find two distinct inputs that hash to the same value. Hash functions 
+    ''' infeasible to find two distinct inputs that hash to the same value. Hash functions
     ''' are commonly used with digital signatures and for data integrity.
     ''' </summary>
     Public Class Hash
@@ -27,30 +27,37 @@ Namespace Encryption
         ''' Type of hash; some are security oriented, others are fast and simple
         ''' </summary>
         Public Enum Provider
+
             ''' <summary>
             ''' Cyclic Redundancy Check provider, 32-bit
             ''' </summary>
             CRC32
+
             ''' <summary>
             ''' Secure Hashing Algorithm provider, SHA-1 variant, 160-bit
             ''' </summary>
             SHA1
+
             ''' <summary>
             ''' Secure Hashing Algorithm provider, SHA-2 variant, 256-bit
             ''' </summary>
             SHA256
+
             ''' <summary>
             ''' Secure Hashing Algorithm provider, SHA-2 variant, 384-bit
             ''' </summary>
             SHA384
+
             ''' <summary>
             ''' Secure Hashing Algorithm provider, SHA-2 variant, 512-bit
             ''' </summary>
             SHA512
+
             ''' <summary>
             ''' Message Digest algorithm 5, 128-bit
             ''' </summary>
             MD5
+
         End Enum
 
         Private _Hash As HashAlgorithm
@@ -104,8 +111,8 @@ Namespace Encryption
         End Function
 
         ''' <summary>
-        ''' Calculates hash for a string with a prefixed salt value. 
-        ''' A "salt" is random data prefixed to every hashed value to prevent 
+        ''' Calculates hash for a string with a prefixed salt value.
+        ''' A "salt" is random data prefixed to every hashed value to prevent
         ''' common dictionary attacks.
         ''' </summary>
         Public Function Calculate(ByVal d As Data, ByVal salt As Data) As Data
@@ -124,6 +131,7 @@ Namespace Encryption
         End Function
 
 #Region "  CRC32 HashAlgorithm"
+
         Private Class CRC32
             Inherits HashAlgorithm
 
@@ -148,70 +156,70 @@ Namespace Encryption
                 result = &HFFFFFFFF
             End Sub
 
-            Private crcLookup() As Integer = { _
-                &H0, &H77073096, &HEE0E612C, &H990951BA, _
-                &H76DC419, &H706AF48F, &HE963A535, &H9E6495A3, _
-                &HEDB8832, &H79DCB8A4, &HE0D5E91E, &H97D2D988, _
-                &H9B64C2B, &H7EB17CBD, &HE7B82D07, &H90BF1D91, _
-                &H1DB71064, &H6AB020F2, &HF3B97148, &H84BE41DE, _
-                &H1ADAD47D, &H6DDDE4EB, &HF4D4B551, &H83D385C7, _
-                &H136C9856, &H646BA8C0, &HFD62F97A, &H8A65C9EC, _
-                &H14015C4F, &H63066CD9, &HFA0F3D63, &H8D080DF5, _
-                &H3B6E20C8, &H4C69105E, &HD56041E4, &HA2677172, _
-                &H3C03E4D1, &H4B04D447, &HD20D85FD, &HA50AB56B, _
-                &H35B5A8FA, &H42B2986C, &HDBBBC9D6, &HACBCF940, _
-                &H32D86CE3, &H45DF5C75, &HDCD60DCF, &HABD13D59, _
-                &H26D930AC, &H51DE003A, &HC8D75180, &HBFD06116, _
-                &H21B4F4B5, &H56B3C423, &HCFBA9599, &HB8BDA50F, _
-                &H2802B89E, &H5F058808, &HC60CD9B2, &HB10BE924, _
-                &H2F6F7C87, &H58684C11, &HC1611DAB, &HB6662D3D, _
-                &H76DC4190, &H1DB7106, &H98D220BC, &HEFD5102A, _
-                &H71B18589, &H6B6B51F, &H9FBFE4A5, &HE8B8D433, _
-                &H7807C9A2, &HF00F934, &H9609A88E, &HE10E9818, _
-                &H7F6A0DBB, &H86D3D2D, &H91646C97, &HE6635C01, _
-                &H6B6B51F4, &H1C6C6162, &H856530D8, &HF262004E, _
-                &H6C0695ED, &H1B01A57B, &H8208F4C1, &HF50FC457, _
-                &H65B0D9C6, &H12B7E950, &H8BBEB8EA, &HFCB9887C, _
-                &H62DD1DDF, &H15DA2D49, &H8CD37CF3, &HFBD44C65, _
-                &H4DB26158, &H3AB551CE, &HA3BC0074, &HD4BB30E2, _
-                &H4ADFA541, &H3DD895D7, &HA4D1C46D, &HD3D6F4FB, _
-                &H4369E96A, &H346ED9FC, &HAD678846, &HDA60B8D0, _
-                &H44042D73, &H33031DE5, &HAA0A4C5F, &HDD0D7CC9, _
-                &H5005713C, &H270241AA, &HBE0B1010, &HC90C2086, _
-                &H5768B525, &H206F85B3, &HB966D409, &HCE61E49F, _
-                &H5EDEF90E, &H29D9C998, &HB0D09822, &HC7D7A8B4, _
-                &H59B33D17, &H2EB40D81, &HB7BD5C3B, &HC0BA6CAD, _
-                &HEDB88320, &H9ABFB3B6, &H3B6E20C, &H74B1D29A, _
-                &HEAD54739, &H9DD277AF, &H4DB2615, &H73DC1683, _
-                &HE3630B12, &H94643B84, &HD6D6A3E, &H7A6A5AA8, _
-                &HE40ECF0B, &H9309FF9D, &HA00AE27, &H7D079EB1, _
-                &HF00F9344, &H8708A3D2, &H1E01F268, &H6906C2FE, _
-                &HF762575D, &H806567CB, &H196C3671, &H6E6B06E7, _
-                &HFED41B76, &H89D32BE0, &H10DA7A5A, &H67DD4ACC, _
-                &HF9B9DF6F, &H8EBEEFF9, &H17B7BE43, &H60B08ED5, _
-                &HD6D6A3E8, &HA1D1937E, &H38D8C2C4, &H4FDFF252, _
-                &HD1BB67F1, &HA6BC5767, &H3FB506DD, &H48B2364B, _
-                &HD80D2BDA, &HAF0A1B4C, &H36034AF6, &H41047A60, _
-                &HDF60EFC3, &HA867DF55, &H316E8EEF, &H4669BE79, _
-                &HCB61B38C, &HBC66831A, &H256FD2A0, &H5268E236, _
-                &HCC0C7795, &HBB0B4703, &H220216B9, &H5505262F, _
-                &HC5BA3BBE, &HB2BD0B28, &H2BB45A92, &H5CB36A04, _
-                &HC2D7FFA7, &HB5D0CF31, &H2CD99E8B, &H5BDEAE1D, _
-                &H9B64C2B0, &HEC63F226, &H756AA39C, &H26D930A, _
-                &H9C0906A9, &HEB0E363F, &H72076785, &H5005713, _
-                &H95BF4A82, &HE2B87A14, &H7BB12BAE, &HCB61B38, _
-                &H92D28E9B, &HE5D5BE0D, &H7CDCEFB7, &HBDBDF21, _
-                &H86D3D2D4, &HF1D4E242, &H68DDB3F8, &H1FDA836E, _
-                &H81BE16CD, &HF6B9265B, &H6FB077E1, &H18B74777, _
-                &H88085AE6, &HFF0F6A70, &H66063BCA, &H11010B5C, _
-                &H8F659EFF, &HF862AE69, &H616BFFD3, &H166CCF45, _
-                &HA00AE278, &HD70DD2EE, &H4E048354, &H3903B3C2, _
-                &HA7672661, &HD06016F7, &H4969474D, &H3E6E77DB, _
-                &HAED16A4A, &HD9D65ADC, &H40DF0B66, &H37D83BF0, _
-                &HA9BCAE53, &HDEBB9EC5, &H47B2CF7F, &H30B5FFE9, _
-                &HBDBDF21C, &HCABAC28A, &H53B39330, &H24B4A3A6, _
-                &HBAD03605, &HCDD70693, &H54DE5729, &H23D967BF, _
-                &HB3667A2E, &HC4614AB8, &H5D681B02, &H2A6F2B94, _
+            Private crcLookup() As Integer = {
+                &H0, &H77073096, &HEE0E612C, &H990951BA,
+                &H76DC419, &H706AF48F, &HE963A535, &H9E6495A3,
+                &HEDB8832, &H79DCB8A4, &HE0D5E91E, &H97D2D988,
+                &H9B64C2B, &H7EB17CBD, &HE7B82D07, &H90BF1D91,
+                &H1DB71064, &H6AB020F2, &HF3B97148, &H84BE41DE,
+                &H1ADAD47D, &H6DDDE4EB, &HF4D4B551, &H83D385C7,
+                &H136C9856, &H646BA8C0, &HFD62F97A, &H8A65C9EC,
+                &H14015C4F, &H63066CD9, &HFA0F3D63, &H8D080DF5,
+                &H3B6E20C8, &H4C69105E, &HD56041E4, &HA2677172,
+                &H3C03E4D1, &H4B04D447, &HD20D85FD, &HA50AB56B,
+                &H35B5A8FA, &H42B2986C, &HDBBBC9D6, &HACBCF940,
+                &H32D86CE3, &H45DF5C75, &HDCD60DCF, &HABD13D59,
+                &H26D930AC, &H51DE003A, &HC8D75180, &HBFD06116,
+                &H21B4F4B5, &H56B3C423, &HCFBA9599, &HB8BDA50F,
+                &H2802B89E, &H5F058808, &HC60CD9B2, &HB10BE924,
+                &H2F6F7C87, &H58684C11, &HC1611DAB, &HB6662D3D,
+                &H76DC4190, &H1DB7106, &H98D220BC, &HEFD5102A,
+                &H71B18589, &H6B6B51F, &H9FBFE4A5, &HE8B8D433,
+                &H7807C9A2, &HF00F934, &H9609A88E, &HE10E9818,
+                &H7F6A0DBB, &H86D3D2D, &H91646C97, &HE6635C01,
+                &H6B6B51F4, &H1C6C6162, &H856530D8, &HF262004E,
+                &H6C0695ED, &H1B01A57B, &H8208F4C1, &HF50FC457,
+                &H65B0D9C6, &H12B7E950, &H8BBEB8EA, &HFCB9887C,
+                &H62DD1DDF, &H15DA2D49, &H8CD37CF3, &HFBD44C65,
+                &H4DB26158, &H3AB551CE, &HA3BC0074, &HD4BB30E2,
+                &H4ADFA541, &H3DD895D7, &HA4D1C46D, &HD3D6F4FB,
+                &H4369E96A, &H346ED9FC, &HAD678846, &HDA60B8D0,
+                &H44042D73, &H33031DE5, &HAA0A4C5F, &HDD0D7CC9,
+                &H5005713C, &H270241AA, &HBE0B1010, &HC90C2086,
+                &H5768B525, &H206F85B3, &HB966D409, &HCE61E49F,
+                &H5EDEF90E, &H29D9C998, &HB0D09822, &HC7D7A8B4,
+                &H59B33D17, &H2EB40D81, &HB7BD5C3B, &HC0BA6CAD,
+                &HEDB88320, &H9ABFB3B6, &H3B6E20C, &H74B1D29A,
+                &HEAD54739, &H9DD277AF, &H4DB2615, &H73DC1683,
+                &HE3630B12, &H94643B84, &HD6D6A3E, &H7A6A5AA8,
+                &HE40ECF0B, &H9309FF9D, &HA00AE27, &H7D079EB1,
+                &HF00F9344, &H8708A3D2, &H1E01F268, &H6906C2FE,
+                &HF762575D, &H806567CB, &H196C3671, &H6E6B06E7,
+                &HFED41B76, &H89D32BE0, &H10DA7A5A, &H67DD4ACC,
+                &HF9B9DF6F, &H8EBEEFF9, &H17B7BE43, &H60B08ED5,
+                &HD6D6A3E8, &HA1D1937E, &H38D8C2C4, &H4FDFF252,
+                &HD1BB67F1, &HA6BC5767, &H3FB506DD, &H48B2364B,
+                &HD80D2BDA, &HAF0A1B4C, &H36034AF6, &H41047A60,
+                &HDF60EFC3, &HA867DF55, &H316E8EEF, &H4669BE79,
+                &HCB61B38C, &HBC66831A, &H256FD2A0, &H5268E236,
+                &HCC0C7795, &HBB0B4703, &H220216B9, &H5505262F,
+                &HC5BA3BBE, &HB2BD0B28, &H2BB45A92, &H5CB36A04,
+                &HC2D7FFA7, &HB5D0CF31, &H2CD99E8B, &H5BDEAE1D,
+                &H9B64C2B0, &HEC63F226, &H756AA39C, &H26D930A,
+                &H9C0906A9, &HEB0E363F, &H72076785, &H5005713,
+                &H95BF4A82, &HE2B87A14, &H7BB12BAE, &HCB61B38,
+                &H92D28E9B, &HE5D5BE0D, &H7CDCEFB7, &HBDBDF21,
+                &H86D3D2D4, &HF1D4E242, &H68DDB3F8, &H1FDA836E,
+                &H81BE16CD, &HF6B9265B, &H6FB077E1, &H18B74777,
+                &H88085AE6, &HFF0F6A70, &H66063BCA, &H11010B5C,
+                &H8F659EFF, &HF862AE69, &H616BFFD3, &H166CCF45,
+                &HA00AE278, &HD70DD2EE, &H4E048354, &H3903B3C2,
+                &HA7672661, &HD06016F7, &H4969474D, &H3E6E77DB,
+                &HAED16A4A, &HD9D65ADC, &H40DF0B66, &H37D83BF0,
+                &HA9BCAE53, &HDEBB9EC5, &H47B2CF7F, &H30B5FFE9,
+                &HBDBDF21C, &HCABAC28A, &H53B39330, &H24B4A3A6,
+                &HBAD03605, &HCDD70693, &H54DE5729, &H23D967BF,
+                &HB3667A2E, &HC4614AB8, &H5D681B02, &H2A6F2B94,
                 &HB40BBE37, &HC30C8EA1, &H5A05DF1B, &H2D02EF8D}
 
             Public Overrides ReadOnly Property Hash() As Byte()
@@ -221,17 +229,19 @@ Namespace Encryption
                     Return b
                 End Get
             End Property
+
         End Class
 
 #End Region
 
     End Class
+
 #End Region
 
 #Region "  Symmetric"
 
     ''' <summary>
-    ''' Symmetric encryption uses a single key to encrypt and decrypt. 
+    ''' Symmetric encryption uses a single key to encrypt and decrypt.
     ''' Both parties (encryptor and decryptor) must share the same secret key.
     ''' </summary>
     Public Class Symmetric
@@ -240,22 +250,27 @@ Namespace Encryption
         Private Const _BufferSize As Integer = 2048
 
         Public Enum Provider
+
             ''' <summary>
             ''' The Data Encryption Standard provider supports a 64 bit key only
             ''' </summary>
             DES
+
             ''' <summary>
             ''' The Rivest Cipher 2 provider supports keys ranging from 40 to 128 bits, default is 128 bits
             ''' </summary>
             RC2
+
             ''' <summary>
             ''' The Rijndael (also known as AES) provider supports keys of 128, 192, or 256 bits with a default of 256 bits
             ''' </summary>
             Rijndael
+
             ''' <summary>
             ''' The TripleDES provider (also known as 3DES) supports keys of 128 or 192 bits with a default of 192 bits
             ''' </summary>
             TripleDES
+
         End Enum
 
         Private _data As Data
@@ -273,13 +288,13 @@ Namespace Encryption
         ''' </summary>
         Public Sub New(ByVal provider As Provider, Optional ByVal useDefaultInitializationVector As Boolean = True)
             Select Case provider
-                Case provider.DES
+                Case Provider.DES
                     _crypto = New DESCryptoServiceProvider
-                Case provider.RC2
+                Case Provider.RC2
                     _crypto = New RC2CryptoServiceProvider
-                Case provider.Rijndael
+                Case Provider.Rijndael
                     _crypto = New RijndaelManaged
-                Case provider.TripleDES
+                Case Provider.TripleDES
                     _crypto = New TripleDESCryptoServiceProvider
             End Select
 
@@ -293,7 +308,7 @@ Namespace Encryption
         End Sub
 
         ''' <summary>
-        ''' Key size in bytes. We use the default key size for any given provider; if you 
+        ''' Key size in bytes. We use the default key size for any given provider; if you
         ''' want to force a specific key size, set this property
         ''' </summary>
         Public Property KeySizeBytes() As Integer
@@ -307,7 +322,7 @@ Namespace Encryption
         End Property
 
         ''' <summary>
-        ''' Key size in bits. We use the default key size for any given provider; if you 
+        ''' Key size in bits. We use the default key size for any given provider; if you
         ''' want to force a specific key size, set this property
         ''' </summary>
         Public Property KeySizeBits() As Integer
@@ -480,7 +495,7 @@ Namespace Encryption
             Dim b(_BufferSize) As Byte
 
             ValidateKeyAndIv(False)
-            Dim cs As New CryptoStream(encryptedStream, _
+            Dim cs As New CryptoStream(encryptedStream,
                 _crypto.CreateDecryptor(), CryptoStreamMode.Read)
 
             Dim i As Integer
@@ -524,8 +539,8 @@ Namespace Encryption
 
     ''' <summary>
     ''' Asymmetric encryption uses a pair of keys to encrypt and decrypt.
-    ''' There is a "public" key which is used to encrypt. Decrypting, on the other hand, 
-    ''' requires both the "public" key and an additional "private" key. The advantage is 
+    ''' There is a "public" key which is used to encrypt. Decrypting, on the other hand,
+    ''' requires both the "public" key and an additional "private" key. The advantage is
     ''' that people can send you encrypted messages without being able to decrypt them.
     ''' </summary>
     ''' <remarks>
@@ -548,8 +563,9 @@ Namespace Encryption
         Private Const _ElementCoefficient As String = "InverseQ"
         Private Const _ElementPrivateExponent As String = "D"
 
-        '-- http://forum.java.sun.com/thread.jsp?forum=9&thread=552022&tstart=0&trange=15 
+        '-- http://forum.java.sun.com/thread.jsp?forum=9&thread=552022&tstart=0&trange=15
         Private Const _KeyModulus As String = "PublicKey.Modulus"
+
         Private Const _KeyExponent As String = "PublicKey.Exponent"
         Private Const _KeyPrimeP As String = "PrivateKey.P"
         Private Const _KeyPrimeQ As String = "PrivateKey.Q"
@@ -559,8 +575,9 @@ Namespace Encryption
         Private Const _KeyPrivateExponent As String = "PrivateKey.D"
 
 #Region "  PublicKey Class"
+
         ''' <summary>
-        ''' Represents a public encryption key. Intended to be shared, it 
+        ''' Represents a public encryption key. Intended to be shared, it
         ''' contains only the Modulus and Exponent.
         ''' </summary>
         Public Class PublicKey
@@ -645,12 +662,13 @@ Namespace Encryption
             End Sub
 
         End Class
+
 #End Region
 
 #Region "  PrivateKey Class"
 
         ''' <summary>
-        ''' Represents a private encryption key. Not intended to be shared, as it 
+        ''' Represents a private encryption key. Not intended to be shared, as it
         ''' contains all the elements that make up the key.
         ''' </summary>
         Public Class PrivateKey
@@ -775,7 +793,7 @@ Namespace Encryption
 #End Region
 
         ''' <summary>
-        ''' Instantiates a new asymmetric encryption session using the default key size; 
+        ''' Instantiates a new asymmetric encryption session using the default key size;
         ''' this is usally 1024 bits
         ''' </summary>
         Public Sub New()
@@ -791,8 +809,8 @@ Namespace Encryption
         End Sub
 
         ''' <summary>
-        ''' Sets the name of the key container used to store this key on disk; this is an 
-        ''' unavoidable side effect of the underlying Microsoft CryptoAPI. 
+        ''' Sets the name of the key container used to store this key on disk; this is an
+        ''' unavoidable side effect of the underlying Microsoft CryptoAPI.
         ''' </summary>
         ''' <remarks>
         ''' http://support.microsoft.com/default.aspx?scid=http://support.microsoft.com:80/support/kb/articles/q322/3/71.asp&amp;NoWebContent=1
@@ -955,7 +973,7 @@ Namespace Encryption
                 Else
                     s = "public"
                 End If
-                Throw New Security.XmlSyntaxException( _
+                Throw New Security.XmlSyntaxException(
                     String.Format("The provided {0} encryption key XML does not appear to be valid.", s), ex)
             End Try
         End Sub
@@ -965,7 +983,7 @@ Namespace Encryption
         End Function
 
         ''' <summary>
-        ''' gets the default RSA provider using the specified key size; 
+        ''' gets the default RSA provider using the specified key size;
         ''' note that Microsoft's CryptoAPI has an underlying file system dependency that is unavoidable
         ''' </summary>
         ''' <remarks>
@@ -983,10 +1001,10 @@ Namespace Encryption
                 Return rsa
             Catch ex As System.Security.Cryptography.CryptographicException
                 If ex.Message.ToLower.IndexOf("csp for this implementation could not be acquired") > -1 Then
-                    Throw New Exception("Unable to obtain Cryptographic Service Provider. " & _
-                        "Either the permissions are incorrect on the " & _
-                        "'C:\Documents and Settings\All Users\Application Data\Microsoft\Crypto\RSA\MachineKeys' " & _
-                        "folder, or the current security context '" & Security.Principal.WindowsIdentity.GetCurrent.Name & "'" & _
+                    Throw New Exception("Unable to obtain Cryptographic Service Provider. " &
+                        "Either the permissions are incorrect on the " &
+                        "'C:\Documents and Settings\All Users\Application Data\Microsoft\Crypto\RSA\MachineKeys' " &
+                        "folder, or the current security context '" & Security.Principal.WindowsIdentity.GetCurrent.Name & "'" &
                         " does not have access to this folder.", ex)
                 Else
                     Throw
@@ -1009,9 +1027,9 @@ Namespace Encryption
 
     ''' <summary>
     ''' represents Hex, Byte, Base64, or String data to encrypt/decrypt;
-    ''' use the .Text property to set/get a string representation 
-    ''' use the .Hex property to set/get a string-based Hexadecimal representation 
-    ''' use the .Base64 to set/get a string-based Base64 representation 
+    ''' use the .Text property to set/get a string representation
+    ''' use the .Hex property to set/get a string-based Hexadecimal representation
+    ''' use the .Base64 to set/get a string-based Base64 representation
     ''' </summary>
     Public Class Data
         Private _b As Byte()
@@ -1043,7 +1061,7 @@ Namespace Encryption
         End Sub
 
         ''' <summary>
-        ''' Creates new encryption data with the specified string; 
+        ''' Creates new encryption data with the specified string;
         ''' will be converted to byte array using default encoding
         ''' </summary>
         Public Sub New(ByVal s As String)
@@ -1051,7 +1069,7 @@ Namespace Encryption
         End Sub
 
         ''' <summary>
-        ''' Creates new encryption data using the specified string and the 
+        ''' Creates new encryption data using the specified string and the
         ''' specified encoding to convert the string to a byte array.
         ''' </summary>
         Public Sub New(ByVal s As String, ByVal encoding As System.Text.Encoding)
@@ -1147,7 +1165,7 @@ Namespace Encryption
         End Property
 
         ''' <summary>
-        ''' Returns the byte representation of the data; 
+        ''' Returns the byte representation of the data;
         ''' This will be padded to MinBytes and trimmed to MaxBytes as necessary!
         ''' </summary>
         Public Property Bytes() As Byte()
@@ -1283,7 +1301,7 @@ Namespace Encryption
                 Next
                 Return b
             Catch ex As Exception
-                Throw New System.FormatException("The provided string does not appear to be Hex encoded:" & _
+                Throw New System.FormatException("The provided string does not appear to be Hex encoded:" &
                     Environment.NewLine & hexEncoded & Environment.NewLine, ex)
             End Try
         End Function
@@ -1298,7 +1316,7 @@ Namespace Encryption
             Try
                 Return Convert.FromBase64String(base64Encoded)
             Catch ex As System.FormatException
-                Throw New System.FormatException("The provided string does not appear to be Base64 encoded:" & _
+                Throw New System.FormatException("The provided string does not appear to be Base64 encoded:" &
                     Environment.NewLine & base64Encoded & Environment.NewLine, ex)
             End Try
         End Function
@@ -1328,7 +1346,7 @@ Namespace Encryption
         ''' <summary>
         ''' Returns the specified string value from the application .config file
         ''' </summary>
-        Friend Shared Function GetConfigString(ByVal key As String, _
+        Friend Shared Function GetConfigString(ByVal key As String,
             Optional ByVal isRequired As Boolean = True) As String
 
             Dim s As String = CType(ConfigurationManager.AppSettings.Get(key), String)
@@ -1367,4 +1385,4 @@ Namespace Encryption
 
 #End Region
 
-    End Namespace
+End Namespace
