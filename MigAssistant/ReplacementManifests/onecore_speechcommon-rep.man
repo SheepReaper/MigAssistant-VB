@@ -1,0 +1,183 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes'?>
+<assembly
+    xmlns="urn:schemas-microsoft-com:asm.v3"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    manifestVersion="1.0"
+    >
+  <assemblyIdentity
+      name="Microsoft-Windows-SpeechCommon-OneCore"
+      processorArchitecture="*"
+      version="0.0.0.0"
+      language="neutral"
+      />
+  <migration
+      replacementSettingsVersionRange="0-1"
+      scope="Upgrade,MigWiz,USMT"
+      settingsVersion="2"
+      >
+      <machineSpecific>
+        <migXml xmlns="">
+          <rules>
+            <!-- rules to execute special privacy settings migration --> 
+            <conditions operation="AND">
+
+              <!-- the OS version is between 10.0 and 10.0.14393 (TH1 to RS1 inclusive) -->
+              <condition>MigXmlHelper.IsOSLaterThan("NT","10.0")</condition>
+              <condition>MigXmlHelper.IsOSEarlierThan("NT","10.0.14393")</condition>
+
+              <!-- this not a Server edition -->
+              <condition negation="Yes">MigXmlHelper.DoesStringContentContain("Registry", "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion [EditionID]", "Server")</condition>
+
+              <!-- this not PPIPro edition -->
+              <condition negation="Yes">MigXmlHelper.DoesStringContentContain("Registry", "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion [EditionID]", "PPIPro")</condition>
+
+              <!-- system is not joined to a domain, NV Domain does not exist or it's empty --> 
+              <conditions operation="OR">
+                <condition negation="Yes">MigXmlHelper.DoesObjectExist("Registry", "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters [NV Domain]")</condition>
+                <condition>MigXmlHelper.DoesStringContentEqual("Registry", "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters [NV Domain]", "")</condition>
+              </conditions>
+
+              <!-- system is not managed by SCCM, ProductCode does not exist or it's empty --> 
+              <conditions operation="OR">
+                <condition negation="Yes">MigXmlHelper.DoesObjectExist("Registry", "HKLM\SOFTWARE\Microsoft\SMS\Mobile Client [ProductCode]")</condition>
+                <condition>MigXmlHelper.DoesStringContentEqual("Registry", "HKLM\SOFTWARE\Microsoft\SMS\Mobile Client [ProductCode]", "")</condition>
+              </conditions>
+
+              <!-- system is not updated using WSUS -->
+              <condition negation="Yes">MigXmlHelper.DoesStringContentEqual("Registry", "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU [UseWUServer]", "0x00000001")</condition>
+
+              <!-- we don't have an explicit request to perform a normal migration -->
+              <condition negation="Yes">MigXmlHelper.DoesStringContentEqual("Registry", "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CreatorsUpdatePrivacySettings [ShowUI]", "0x00000000")</condition>
+
+            </conditions>
+
+            <!-- Do not migrate the normal AcceptedPrivacyPolicy value from either HKLM or HKCU -->
+            <rules context="System">
+              <exclude>
+                <objectSet>
+                  <pattern type="Registry">HKLM\SOFTWARE\Microsoft\Personalization\Settings [AcceptedPrivacyPolicy]</pattern>
+                </objectSet>
+              </exclude>
+            </rules>
+            <rules context="User">
+              <exclude>
+                <objectSet>
+                  <pattern type="Registry">HKCU\SOFTWARE\Microsoft\Personalization\Settings [AcceptedPrivacyPolicy]</pattern>
+                </objectSet>
+              </exclude>
+            </rules>
+
+            <rules context="System">
+              <!-- Simulate the value of the WSD Apps setting if it's not there -->
+              <addObjects>
+                <conditions>
+                  <condition negation="yes">MigXmlHelper.DoesObjectExist("Registry", "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CreatorsUpdatePrivacySettings\SettingChoice\EnableSpeechRecognition\HKLM [AcceptedPrivacyPolicy]")</condition>
+                </conditions>
+                <object>
+                  <location type="Registry">HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CreatorsUpdatePrivacySettings\SettingChoice\EnableSpeechRecognition\HKLM [AcceptedPrivacyPolicy]</location>
+                  <attributes>dword</attributes>
+                  <bytes>00000000</bytes>
+                </object>
+              </addObjects>
+
+              <!-- and now migrate the WSD App's setting -->
+              <include>
+                <objectSet>
+                  <pattern type="Registry">HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CreatorsUpdatePrivacySettings\SettingChoice\EnableSpeechRecognition\HKLM [AcceptedPrivacyPolicy]</pattern>
+                </objectSet>
+              </include>
+            </rules>
+
+          </rules>
+
+          <rules context="System">
+            <include>
+              <objectSet>
+                <pattern type="Registry">HKLM\SOFTWARE\Microsoft\Personalization\Settings\* [*]</pattern>
+              </objectSet>
+            </include>
+            <merge script="MigXmlHelper.SourcePriority()">
+              <objectSet>
+                <pattern type="Registry">HKLM\SOFTWARE\Microsoft\Personalization\Settings\* [*]</pattern>
+              </objectSet>
+            </merge>
+          </rules>
+          <rules context="User">
+            <include>
+              <objectSet>
+                <pattern type="Registry">HKCU\SOFTWARE\Microsoft\Personalization\Settings\* [*]</pattern>
+              </objectSet>
+            </include>
+            <merge script="MigXmlHelper.SourcePriority()">
+              <objectSet>
+                <pattern type="Registry">HKCU\SOFTWARE\Microsoft\Personalization\Settings\* [*]</pattern>
+              </objectSet>
+            </merge>
+          </rules>
+        </migXml>
+      </machineSpecific>
+      <migXml xmlns="">
+          <rules context="System">
+              <include>
+                  <objectSet>
+                      <pattern type="Registry">HKLM\Software\Microsoft\Speech_OneCore\AudioInput\MicWiz [DefaultDefaultMicGain]</pattern>
+                  </objectSet>
+              </include>
+          </rules>
+          <rules context="User">
+              <include>
+                  <objectSet>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\AppLexicons [*]</pattern>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\CurrentUserLexicon\* [*]</pattern>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\CurrentUserShortcut\* [*]</pattern>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\PromptVoices [*]</pattern>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\RecoProfiles\* [*]</pattern>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\Recognizers\* [*]</pattern>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\Voices [*]</pattern>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\AudioInput\TokenEnums\MMAudioIn\* [*]</pattern>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\AudioOutput\TokenEnums\MMAudioOut\* [*]</pattern>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\AudioInput\[DefaultTokenId]</pattern>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\AudioOutput\[DefaultTokenId]</pattern>
+                      <pattern type="File">%CSIDL_APPDATA%\Microsoft\Speech_OneCore\Files\* [*]</pattern>
+                      <pattern type="File">%CSIDL_LOCAL_APPDATA%\Microsoft\Speech_OneCore\Files\* [*]</pattern>
+                  </objectSet>
+              </include>
+              <locationModify script="MigXmlHelper.ExactMove(&apos;HKCU\Software\Microsoft\Speech_OneCore\RecoProfiles\Tokens\* [Model Characteristic 1]&apos;)">
+                  <objectSet>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\RecoProfiles\Tokens\* [Age]</pattern>
+                  </objectSet>
+              </locationModify>
+              <locationModify script="MigXmlHelper.ExactMove(&apos;HKCU\Software\Microsoft\Speech_OneCore\RecoProfiles\Tokens\* [Model Characteristic 2]&apos;)">
+                  <objectSet>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\RecoProfiles\Tokens\* [Gender]</pattern>
+                  </objectSet>
+              </locationModify>
+              <merge script="MigXmlHelper.SourcePriority()">
+                  <objectSet>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\AppLexicons [*]</pattern>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\CurrentUserLexicon\* [*]</pattern>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\CurrentUserShortcut\* [*]</pattern>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\PromptVoices [*]</pattern>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\RecoProfiles\* [*]</pattern>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\Recognizers\* [*]</pattern>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\Voices [*]</pattern>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\AudioInput\TokenEnums\MMAudioIn\* [*]</pattern>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\AudioOutput\TokenEnums\MMAudioOut\* [*]</pattern>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\AudioInput\[DefaultTokenId]</pattern>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\AudioOutput\[DefaultTokenId]</pattern>
+                      <pattern type="File">%CSIDL_APPDATA%\Microsoft\Speech_OneCore\Files\* [*]</pattern>
+                      <pattern type="File">%CSIDL_LOCAL_APPDATA%\Microsoft\Speech_OneCore\Files\* [*]</pattern>
+                  </objectSet>
+              </merge>
+              <exclude>
+                  <objectSet>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\RecoProfiles\Tokens\* [Age]</pattern>
+                      <pattern type="Registry">HKCU\Software\Microsoft\Speech_OneCore\RecoProfiles\Tokens\* [Gender]</pattern>
+                  </objectSet>
+              </exclude>
+          </rules>
+      </migXml>
+      <migrationDisplayID>Sound_and_Speech_Recognition\Speech_Recognition</migrationDisplayID>
+  </migration>
+</assembly>
