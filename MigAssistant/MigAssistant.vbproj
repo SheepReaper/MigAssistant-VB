@@ -27,6 +27,7 @@
     <TargetFrameworkSubset>
     </TargetFrameworkSubset>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -39,7 +40,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -86,33 +86,35 @@
     <Import Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="classEncryption.vb" />
-    <Compile Include="classHealthCheck.vb" />
-    <Compile Include="classEmail.vb" />
-    <Compile Include="classMigration.vb" />
-    <Compile Include="formMigrationAdvancedSettings.Designer.vb">
-      <DependentUpon>formMigrationAdvancedSettings.vb</DependentUpon>
+    <Compile Include="Encryption\Asymmetric.vb" />
+    <Compile Include="Encryption\Data.vb" />
+    <Compile Include="Encryption\Hash.vb" />
+    <Compile Include="HealthCheck.vb" />
+    <Compile Include="Email.vb" />
+    <Compile Include="Migration.vb" />
+    <Compile Include="AdvancedSettingsForm.Designer.vb">
+      <DependentUpon>AdvancedSettingsForm.vb</DependentUpon>
     </Compile>
-    <Compile Include="formMigrationAdvancedSettings.vb">
+    <Compile Include="AdvancedSettingsForm.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="formCustomEncryption.Designer.vb">
-      <DependentUpon>formCustomEncryption.vb</DependentUpon>
+    <Compile Include="CustomEncryptionForm.Designer.vb">
+      <DependentUpon>CustomEncryptionForm.vb</DependentUpon>
     </Compile>
-    <Compile Include="formCustomEncryption.vb">
+    <Compile Include="CustomEncryptionForm.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="formMigration.vb">
+    <Compile Include="MainForm.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="formMigration.Designer.vb">
-      <DependentUpon>formMigration.vb</DependentUpon>
+    <Compile Include="MainForm.Designer.vb">
+      <DependentUpon>MainForm.vb</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="formRestoreMultiDatastore.Designer.vb">
-      <DependentUpon>formRestoreMultiDatastore.vb</DependentUpon>
+    <Compile Include="RestoreMultiDatastoreForm.Designer.vb">
+      <DependentUpon>RestoreMultiDatastoreForm.vb</DependentUpon>
     </Compile>
-    <Compile Include="formRestoreMultiDatastore.vb">
+    <Compile Include="RestoreMultiDatastoreForm.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="moduleGlobalVariables.vb" />
@@ -132,23 +134,25 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="Settings.vb" />
+    <Compile Include="Encryption\Symmetric.vb" />
+    <Compile Include="Encryption\Utils.vb" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="formMigrationAdvancedSettings.resx">
-      <DependentUpon>formMigrationAdvancedSettings.vb</DependentUpon>
+    <EmbeddedResource Include="AdvancedSettingsForm.resx">
+      <DependentUpon>AdvancedSettingsForm.vb</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="formCustomEncryption.resx">
-      <DependentUpon>formCustomEncryption.vb</DependentUpon>
+    <EmbeddedResource Include="CustomEncryptionForm.resx">
+      <DependentUpon>CustomEncryptionForm.vb</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="formMigration.resx">
+    <EmbeddedResource Include="MainForm.resx">
       <SubType>Designer</SubType>
-      <DependentUpon>formMigration.vb</DependentUpon>
+      <DependentUpon>MainForm.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="formRestoreMultiDatastore.resx">
+    <EmbeddedResource Include="RestoreMultiDatastoreForm.resx">
       <SubType>Designer</SubType>
-      <DependentUpon>formRestoreMultiDatastore.vb</DependentUpon>
+      <DependentUpon>RestoreMultiDatastoreForm.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>

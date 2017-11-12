@@ -1,5 +1,5 @@
 <Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
-Partial Class formRestoreMultiDatastore
+Partial Class RestoreMultiDatastoreForm
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
@@ -19,7 +19,7 @@ Partial Class formRestoreMultiDatastore
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(formRestoreMultiDatastore))
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(RestoreMultiDatastoreForm))
         Me.cbxRestoreMultiDatastoreList = New System.Windows.Forms.ComboBox
         Me.lblRestoreMultiDatastoreBody = New System.Windows.Forms.Label
         Me.btnRestoreMultiDatastoreContinue = New System.Windows.Forms.Button
