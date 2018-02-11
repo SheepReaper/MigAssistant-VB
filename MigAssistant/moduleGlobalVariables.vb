@@ -1,7 +1,18 @@
-Module moduleGlobalVariables
+Imports System.IO
+Imports Microsoft.VisualBasic.FileIO
+Imports MigAssistant.Encryption
 
+Module moduleGlobalVariables
     ' P/Invokes
-    Private Declare Function GetDiskFreeSpaceEx Lib "kernel32" Alias "GetDiskFreeSpaceExA" (ByVal lpDirectoryName As String, ByRef lpFreeBytesAvailableToCaller As Long, ByRef lpTotalNumberOfBytes As Long, ByRef lpTotalNumberOfFreeBytes As Long) As Long
+    Private Declare Function GetDiskFreeSpaceEx Lib "kernel32" Alias "GetDiskFreeSpaceExA"(lpDirectoryName As String,
+                                                                                           ByRef _
+                                                                                              lpFreeBytesAvailableToCaller _
+                                                                                              As Long,
+                                                                                           ByRef lpTotalNumberOfBytes As _
+                                                                                              Long,
+                                                                                           ByRef _
+                                                                                              lpTotalNumberOfFreeBytes _
+                                                                                              As Long) As Long
 
     ' Constants
     Public Const str_MigrationDataStoreFolder As String = "Datastore"
@@ -9,22 +20,26 @@ Module moduleGlobalVariables
     Public Const str_MigrationXMLConfigName As String = "Migration.XML"
 
     ' Locale Settings
-    Public strLocaleDecimal As String = Mid(CStr(11 / 10), 2, 1)
+    Public strLocaleDecimal As String = Mid(CStr(11/10), 2, 1)
     Public strLocaleComma As String = Chr(90 - Asc(strLocaleDecimal))
 
     ' Set up encryption type
-    Public encryption_SymmetricEncryption As New Encryption.Symmetric(Encryption.Symmetric.Provider.TripleDES)
+    Public encryption_SymmetricEncryption As New Symmetric(Symmetric.Provider.TripleDES)
     ' Set encryption key
-    Public encryption_DataHash As New Encryption.Data("1kb3n33nb3st")
+    Public encryption_DataHash As New Data("1kb3n33nb3st")
 
     ' Get OS Information
     Public dbl_OSVersion As Double = Left(My.Computer.Info.OSVersion, 3).Replace(".", strLocaleDecimal)
     Public str_OSFullName As String = My.Computer.Info.OSFullName
-    Public str_OSArchitecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE")
+    Public str_OSArchitecture As String = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE")
 
     ' Current Workstation Information
-    Public str_EnvDomain As String = System.Environment.UserDomainName
-    Public str_EnvUserName As String = Replace(My.User.CurrentPrincipal.Identity.Name, System.Environment.UserDomainName & "\", "", , , CompareMethod.Text)
+    Public str_EnvDomain As String = Environment.UserDomainName
+
+    Public _
+        str_EnvUserName As String = Replace(My.User.CurrentPrincipal.Identity.Name, Environment.UserDomainName & "\", "",
+                                            , , CompareMethod.Text)
+
     Public str_EnvComputerName As String = My.Computer.Name
 
     ' Set Up Variables
@@ -38,7 +53,7 @@ Module moduleGlobalVariables
     Public str_MigrationFolder As String = Nothing
     Public bln_MigrationCancelled As Boolean = False
     Public str_USMTGUID As String = Nothing
-    Public obj_LogFile As System.IO.TextWriter
+    Public obj_LogFile As TextWriter
     Public str_PreviousStatusMessage As String = Nothing
     Public str_StatusMessage As String = Nothing
     Public dtm_StartTime As DateTime = Nothing
@@ -52,7 +67,7 @@ Module moduleGlobalVariables
     ' Get Application Information
     Public str_USMTFolder As String = My.Computer.FileSystem.SpecialDirectories.ProgramFiles & "\USMT301"
     Public str_WMAFolder As String = My.Application.Info.DirectoryPath
-    Public str_TempFolder As String = System.IO.Path.GetTempPath.TrimEnd("\")
+    Public str_TempFolder As String = Path.GetTempPath.TrimEnd("\")
     Public str_LogFile As String = My.Computer.FileSystem.SpecialDirectories.Temp & "\WMA.Log"
     Public str_WMAConfigNetworkCheck As String = "\\ServerName\MigrationShare"
 
@@ -108,15 +123,20 @@ Module moduleGlobalVariables
     Public bln_migrationMaxOverride As Boolean = False
     Public bln_migrationFolderOverride As Boolean = False
 
-    Public Sub sub_DebugMessage(Optional ByVal str_DebugMessage As String = Nothing, Optional ByVal bln_DisplayError As Boolean = False, Optional ByVal bln_WriteEventLogEntry As Boolean = False)
+    Public Sub sub_DebugMessage(Optional ByVal str_DebugMessage As String = Nothing,
+                                Optional ByVal bln_DisplayError As Boolean = False,
+                                Optional ByVal bln_WriteEventLogEntry As Boolean = False)
 
         If bln_DisplayError = True Then
             If str_DebugMessage.Contains("INFO:") Then
-                MsgBox(str_DebugMessage, MsgBoxStyle.Information + MsgBoxStyle.OkOnly + MsgBoxStyle.MsgBoxSetForeground, My.Resources.appTitle)
+                MsgBox(str_DebugMessage, MsgBoxStyle.Information + MsgBoxStyle.OkOnly + MsgBoxStyle.MsgBoxSetForeground,
+                       My.Resources.appTitle)
             ElseIf str_DebugMessage.Contains("WARNING:") Then
-                MsgBox(str_DebugMessage, MsgBoxStyle.Exclamation + MsgBoxStyle.OkOnly + MsgBoxStyle.MsgBoxSetForeground, My.Resources.appTitle)
+                MsgBox(str_DebugMessage, MsgBoxStyle.Exclamation + MsgBoxStyle.OkOnly + MsgBoxStyle.MsgBoxSetForeground,
+                       My.Resources.appTitle)
             ElseIf str_DebugMessage.Contains("ERROR:") Then
-                MsgBox(str_DebugMessage, MsgBoxStyle.Critical + MsgBoxStyle.OkOnly + MsgBoxStyle.MsgBoxSetForeground, My.Resources.appTitle)
+                MsgBox(str_DebugMessage, MsgBoxStyle.Critical + MsgBoxStyle.OkOnly + MsgBoxStyle.MsgBoxSetForeground,
+                       My.Resources.appTitle)
             End If
         End If
 
@@ -134,7 +154,6 @@ Module moduleGlobalVariables
         End If
 
         Console.WriteLine(str_DebugMessage)
-
     End Sub
 
     Public Sub appInitialise()
@@ -150,7 +169,8 @@ Module moduleGlobalVariables
                 If My.Computer.FileSystem.FileExists(str_LogFile) Then
                     sub_DebugMessage("Logfile already exists. Attempting to delete...")
                     Try
-                        My.Computer.FileSystem.DeleteFile(str_LogFile, FileIO.UIOption.OnlyErrorDialogs, FileIO.RecycleOption.DeletePermanently)
+                        My.Computer.FileSystem.DeleteFile(str_LogFile, UIOption.OnlyErrorDialogs,
+                                                          RecycleOption.DeletePermanently)
                         sub_DebugMessage("Logfile deleted")
                     Catch ex As Exception
                         Throw New Exception(ex.Message)
@@ -166,16 +186,16 @@ Module moduleGlobalVariables
                 End Try
 
             Catch ex As Exception
-                MessageBox.Show("ERROR: Unable to create Debug log file: " & ex.Message & ". Debugging switched off", My.Resources.appTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                MessageBox.Show("ERROR: Unable to create Debug log file: " & ex.Message & ". Debugging switched off",
+                                My.Resources.appTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning)
                 bln_SettingsDebugMode = False
             End Try
         End If
 
         sub_DebugMessage(My.Resources.appTitle & " " & My.Resources.appBuild & " - " & My.Resources.appCompany)
-
     End Sub
 
-    Public Sub appShutdown(ByVal int_ExitCode As Integer)
+    Public Sub appShutdown(int_ExitCode As Integer)
 
         sub_DebugMessage()
         sub_DebugMessage("* Application Shutdown *")
@@ -189,11 +209,10 @@ Module moduleGlobalVariables
             obj_LogFile = Nothing
         End If
 
-        System.Environment.Exit(int_ExitCode)
-
+        Environment.Exit(int_ExitCode)
     End Sub
 
-    Public Function func_GetFreeSpace(ByVal str_Location As String) As Long
+    Public Function func_GetFreeSpace(str_Location As String) As Long
 
         Dim lng_BytesTotal, lng_FreeBytes, lng_FreeBytesAvailable, lng_Result As Long
         lng_Result = GetDiskFreeSpaceEx(str_Location, lng_FreeBytesAvailable, lng_BytesTotal, lng_FreeBytes)
@@ -202,14 +221,12 @@ Module moduleGlobalVariables
         Else
             Throw New Exception("ERROR: Invalid or unreadable location")
         End If
-
     End Function
 
-    Private Function func_BytesToMB(ByVal lng_Bytes As Long) As Long
+    Private Function func_BytesToMB(lng_Bytes As Long) As Long
 
         Dim dbl_Result As Double
-        dbl_Result = (lng_Bytes / 1024) / 1024
+        dbl_Result = (lng_Bytes/1024)/1024
         func_BytesToMB = Format(dbl_Result, "###,###,##0.00")
-
     End Function
 End Module

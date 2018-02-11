@@ -1,14 +1,13 @@
+Imports System.Collections.ObjectModel
+Imports System.ComponentModel
 Imports System.IO
-Imports System.Net
-Imports System.Text
-Imports System.Threading
-Imports System.Management
-Imports System.xml
-Imports System.Xml.XPath
+Imports System.Security.AccessControl
+Imports System.Xml
+Imports Microsoft.VisualBasic.FileIO
+Imports SearchOption = Microsoft.VisualBasic.FileIO.SearchOption
 
 
 Public Class form_Migration
-
     ' Set up the USB Event watcher
     Private WithEvents eventwatcher_USBStateChange As ManagementEventWatcher
     ' Set up the classes with events
@@ -18,7 +17,7 @@ Public Class form_Migration
 #Region "Form Events"
 
     ' Form Loading
-    Private Sub form_MigrationLoad(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+    Private Sub form_MigrationLoad(sender As Object, e As EventArgs) Handles MyBase.Load
 
         appInitialise()
 
@@ -79,11 +78,10 @@ Public Class form_Migration
 
         ' Check the command-line for actioning
         sub_InitParseCommandLine()
-
     End Sub
 
     ' Form Showing
-    Private Sub form_MigrationShown(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Shown
+    Private Sub form_MigrationShown(sender As Object, e As EventArgs) Handles MyBase.Shown
 
         sub_DebugMessage()
         sub_DebugMessage("* Form Shown Events *")
@@ -99,28 +97,29 @@ Public Class form_Migration
 
         ' Check if the WMA configuration is valid
         If Not func_InitCheckForValidConfiguration() Then
-            sub_DebugMessage("WARNING: It looks like you haven't yet modified the WMA configuration file (MigAssistant.Exe.Config). Your migration may fail as a result!", True)
+            sub_DebugMessage(
+                "WARNING: It looks like you haven't yet modified the WMA configuration file (MigAssistant.Exe.Config). Your migration may fail as a result!",
+                True)
             ' If we're running in Progress Only mode, start the migration immediately
         ElseIf bln_AppProgressOnlyMode Then
             sub_DebugMessage("Progress Only Mode. Starting Migration...")
             button_Start.PerformClick()
         End If
-
     End Sub
 
     ' Form Closing
-    Private Sub form_MigrationClosing(ByVal sender As Object, ByVal e As System.ComponentModel.CancelEventArgs) Handles MyBase.Closing
+    Private Sub form_MigrationClosing(sender As Object, e As CancelEventArgs) Handles MyBase.Closing
 
         sub_DebugMessage()
         sub_DebugMessage("* Form Closing Events *")
 
         'Exit the application
         appShutdown(My.Resources.exitCodeOk)
-
     End Sub
 
     ' Tab Control
-    Private Sub tabcontrol_MigrationType_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles tabcontrol_MigrationType.SelectedIndexChanged, tabcontrol_MigrationType.DrawItem
+    Private Sub tabcontrol_MigrationType_SelectedIndexChanged(sender As Object, e As EventArgs) _
+        Handles tabcontrol_MigrationType.SelectedIndexChanged, tabcontrol_MigrationType.DrawItem
 
         sub_DebugMessage()
         sub_DebugMessage("* Tab Change / Drawn Events * ")
@@ -146,11 +145,10 @@ Public Class form_Migration
         End Select
 
         button_Start.Focus()
-
     End Sub
 
     ' Handle Start / Stop Buttons
-    Private Sub button_StartStopClick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles button_Start.Click
+    Private Sub button_StartStopClick(sender As Object, e As EventArgs) Handles button_Start.Click
 
         sub_DebugMessage()
         sub_DebugMessage("* Start / Stop Button Click Events *")
@@ -168,11 +166,11 @@ Public Class form_Migration
                 class_Migration.SpinDown()
             End If
         End If
-
     End Sub
 
     ' Data Capture - Workstation Details Radioboxes
-    Private Sub radiobox_WorkstationDetails_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles radiobox_WorkstationDetails1.CheckedChanged, radiobox_WorkstationDetails2.CheckedChanged
+    Private Sub radiobox_WorkstationDetails_CheckedChanged(sender As Object, e As EventArgs) _
+        Handles radiobox_WorkstationDetails1.CheckedChanged, radiobox_WorkstationDetails2.CheckedChanged
 
         sub_DebugMessage()
         sub_DebugMessage("* Workstation Details Radiobox Change Events *")
@@ -184,11 +182,11 @@ Public Class form_Migration
             sub_DebugMessage("Switched to migrate Current User")
             bln_MigrationSettingsAllUsers = False
         End If
-
     End Sub
 
     ' Data Capture - Health Check Skip Checkbox
-    Private Sub checkbox_HealthCheck_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles checkbox_HealthCheck.CheckedChanged
+    Private Sub checkbox_HealthCheck_CheckedChanged(sender As Object, e As EventArgs) _
+        Handles checkbox_HealthCheck.CheckedChanged
 
         sub_DebugMessage()
         sub_DebugMessage("* Health Check Checkbox Events *")
@@ -200,18 +198,17 @@ Public Class form_Migration
             sub_DebugMessage("Health Check Disabled")
             bln_HealthCheck = False
         End If
-
     End Sub
 
     ' Data Capture - Advanced Settings
-    Private Sub btnMigrationSettingsAdvanced_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles button_AdvancedSettings.Click
+    Private Sub btnMigrationSettingsAdvanced_Click(sender As Object, e As EventArgs) _
+        Handles button_AdvancedSettings.Click
 
         sub_DebugMessage()
         sub_DebugMessage("* Advanced Settings Button Events *")
 
         formMigrationAdvancedSettings.Show()
         button_Start.Focus()
-
     End Sub
 
 #End Region
@@ -276,16 +273,21 @@ Public Class form_Migration
         Try
             If Not My.Computer.FileSystem.FileExists(Path.Combine(str_WMAFolder, str_USMTSearchFile)) Then
                 ' If not found, search subdirectories by architecture for any matches
-                For Each foundDirectory As String In (My.Computer.FileSystem.GetFiles(str_WMAFolder, FileIO.SearchOption.SearchAllSubDirectories, str_USMTSearchFile))
+                For Each foundDirectory As String In _
+                    (My.Computer.FileSystem.GetFiles(str_WMAFolder, SearchOption.SearchAllSubDirectories,
+                                                     str_USMTSearchFile))
                     ' Use the same architecture if required
-                    If (Path.GetDirectoryName(foundDirectory).ToUpper.Contains(str_OSArchitecture.ToString.ToUpper)) Then
+                    If (Path.GetDirectoryName(foundDirectory).ToUpper.Contains(str_OSArchitecture.ToString.ToUpper)) _
+                        Then
                         str_USMTFolder = Path.GetDirectoryName(foundDirectory)
                         bln_IsUSMTInstalled = True
                         Exit For
                     End If
                 Next
                 ' If not found, search the Program Files folder for any matches
-                For Each foundDirectory As String In My.Computer.FileSystem.GetDirectories(My.Computer.FileSystem.SpecialDirectories.ProgramFiles, FileIO.SearchOption.SearchTopLevelOnly, "USMT*")
+                For Each foundDirectory As String In _
+                    My.Computer.FileSystem.GetDirectories(My.Computer.FileSystem.SpecialDirectories.ProgramFiles,
+                                                          SearchOption.SearchTopLevelOnly, "USMT*")
                     str_USMTFolder = foundDirectory
                     bln_IsUSMTInstalled = True
                 Next
@@ -305,22 +307,22 @@ Public Class form_Migration
 
         label_MigrationCurrentPhase.Text = "..."
         button_Start.Enabled = True
-
     End Sub
 
-    Private Function func_InitCheckForValidConfiguration()
+    Private Function func_InitCheckForValidConfiguration() As Boolean
 
         sub_DebugMessage()
         sub_DebugMessage("* Check for Valid WMA Configuration *")
 
-        If My.Settings.MigrationNetworkLocation = str_WMAConfigNetworkCheck And Not My.Settings.MigrationNetworkLocationDisabled Then
+        If _
+            My.Settings.MigrationNetworkLocation = str_WMAConfigNetworkCheck And
+            Not My.Settings.MigrationNetworkLocationDisabled Then
             sub_DebugMessage("WARNING: Configuration does not seem to be valid")
             Return False
         Else
             sub_DebugMessage("Configuration seems to be valid")
             Return True
         End If
-
     End Function
 
     Private Sub sub_InitCheckForRuleSetFiles()
@@ -334,9 +336,12 @@ Public Class form_Migration
         ' *** Set up the rules for migration
         For Each ruleset As String In array_MigrationRuleSet
             If Not My.Computer.FileSystem.FileExists(Path.Combine(str_WMAFolder, ruleset.Trim)) Then
-                sub_DebugMessage("WARNING: RuleSet file " & ruleset.Trim & " does not exist. Copying default file from USMT folder...")
+                sub_DebugMessage(
+                    "WARNING: RuleSet file " & ruleset.Trim &
+                    " does not exist. Copying default file from USMT folder...")
                 Try
-                    My.Computer.FileSystem.CopyFile(Path.Combine(str_USMTFolder, ruleset.Trim), Path.Combine(str_WMAFolder, ruleset.Trim), True)
+                    My.Computer.FileSystem.CopyFile(Path.Combine(str_USMTFolder, ruleset.Trim),
+                                                    Path.Combine(str_WMAFolder, ruleset.Trim), True)
                 Catch ex As Exception
                     sub_DebugMessage("ERROR: Unable to copy file - " & Path.Combine(str_USMTFolder, ruleset.Trim))
                     bln_RuleSetCopyFailed = True
@@ -347,14 +352,17 @@ Public Class form_Migration
 
         If bln_RuleSetMissing Then
             If bln_RuleSetCopyFailed Then
-                sub_DebugMessage("ERROR: RuleSet files were not found in the WMA folder. An attempt to copy the default RuleSets from USMT failed. The application will now close.", True)
+                sub_DebugMessage(
+                    "ERROR: RuleSet files were not found in the WMA folder. An attempt to copy the default RuleSets from USMT failed. The application will now close.",
+                    True)
                 appShutdown(21)
             End If
-            sub_DebugMessage("INFO: RuleSet files were not found in the WMA folder. This may be your first time running WMA, so the default RuleSet files have been copied from USMT", True)
+            sub_DebugMessage(
+                "INFO: RuleSet files were not found in the WMA folder. This may be your first time running WMA, so the default RuleSet files have been copied from USMT",
+                True)
         Else
             sub_DebugMessage("All RuleSet files exist")
         End If
-
     End Sub
 
     Private Sub sub_InitParseCommandLine()
@@ -363,7 +371,7 @@ Public Class form_Migration
         sub_DebugMessage("* Parse Command Line *")
 
         Try
-            Dim col_CommandLineArguments As System.Collections.ObjectModel.ReadOnlyCollection(Of String) = My.Application.CommandLineArgs
+            Dim col_CommandLineArguments As ReadOnlyCollection(Of String) = My.Application.CommandLineArgs
             Dim int_Count As Integer
             If Not col_CommandLineArguments.Count > 0 Then
                 Exit Sub
@@ -426,10 +434,10 @@ Public Class form_Migration
                 End Select
             Next
         Catch ex As Exception
-            sub_DebugMessage("ERROR: A problem occurred while processing command-line parameters: " & vbNewLine & ex.Message, True)
+            sub_DebugMessage(
+                "ERROR: A problem occurred while processing command-line parameters: " & vbNewLine & ex.Message, True)
             appShutdown(My.Resources.exitCodeCMDLineParamError)
         End Try
-
     End Sub
 
 #End Region
@@ -449,11 +457,12 @@ Public Class form_Migration
             Dim searcher As New ManagementObjectSearcher(wmiQuery)
             For Each obj_Query As ManagementObject In searcher.Get()
                 ' If this is a USB disk, and the size exceeds what is specified in the settings file
-                If obj_Query("InterfaceType") = "USB" And (obj_Query("Size") / 1048576) >= int_MigrationMinUSBDiskSize Then
-                    sub_DebugMessage("Drive Found: " & func_USBGetDriveLetter(obj_Query("Name")) & " - " & obj_Query("Caption"))
+                If CStr(obj_Query("InterfaceType")) = "USB" And ((CULng(obj_Query("Size"))/1048576) >= int_MigrationMinUSBDiskSize) Then
+                    sub_DebugMessage(
+                        "Drive Found: " & func_USBGetDriveLetter(CType(obj_Query("Name"), String)) & " - " & CStr(obj_Query("Caption")))
                     ' Check SMART tolerences
-                    sub_DebugMessage("Drive SMART Status: " & obj_Query("Status"))
-                    Select Case obj_Query("Status")
+                    sub_DebugMessage("Drive SMART Status: " & CStr(obj_Query("Status")))
+                    Select Case CStr(obj_Query("Status"))
                         Case "OK"
                             ' Automatically use the USB drive if the setting is present
                             If bln_MigrationUSBAutoUseIfAvailable Then
@@ -464,27 +473,35 @@ Public Class form_Migration
 
                                 ' Present option to use new drive
                                 sub_DebugMessage("User Dialog...")
-                                Dim msgbox_Result As DialogResult = MsgBox(My.Resources.usbDeviceDescription & " " & _
-                                My.Resources.usbDeviceConnectedStartup & " " & My.Resources.usbDeviceUseDrive, _
-                                                MsgBoxStyle.YesNo + MsgBoxStyle.SystemModal + MsgBoxStyle.Question, _
-                                                func_USBGetDriveLetter(obj_Query("Name")) & " - " & obj_Query("Caption"))
+                                Dim msgbox_Result As DialogResult = MsgBox(My.Resources.usbDeviceDescription & " " &
+                                                                           My.Resources.usbDeviceConnectedStartup & " " &
+                                                                           My.Resources.usbDeviceUseDrive,
+                                                                           MsgBoxStyle.YesNo + MsgBoxStyle.SystemModal +
+                                                                           MsgBoxStyle.Question,
+                                                                           func_USBGetDriveLetter(obj_Query("Name")) &
+                                                                           " - " & obj_Query("Caption"))
                                 Select Case msgbox_Result
                                     ' Set useUSBMigrationLocation to true and set new USB drive location
-                                    Case Windows.Forms.DialogResult.Yes
+                                    Case DialogResult.Yes
                                         bln_MigrationLocationUseUSB = True
-                                        str_MigrationLocationUSB = Path.GetFullPath(func_USBGetDriveLetter(obj_Query("Name")))
-                                        sub_DebugMessage("User chose to use drive: " & func_USBGetDriveLetter(obj_Query("Name")))
+                                        str_MigrationLocationUSB =
+                                            Path.GetFullPath(func_USBGetDriveLetter(obj_Query("Name")))
+                                        sub_DebugMessage(
+                                            "User chose to use drive: " & func_USBGetDriveLetter(obj_Query("Name")))
                                         Exit Sub
                                     Case Else
-                                        sub_DebugMessage("User chose not to use drive: " & func_USBGetDriveLetter(obj_Query("Name")))
+                                        sub_DebugMessage(
+                                            "User chose not to use drive: " & func_USBGetDriveLetter(obj_Query("Name")))
                                 End Select
                             End If
                         Case Else
                             ' Display error about drive
-                            sub_DebugMessage("ERROR: " & My.Resources.usbDeviceDescription & " " & _
-                                    My.Resources.usbDeviceConnectedStartup & " " & My.Resources.usbDeviceSMARTFail1 & _
-                                    vbNewLine & vbNewLine & My.Resources.usbDeviceSMARTFail2 & vbNewLine & _
-                                    func_USBGetDriveLetter(obj_Query("Name")) & " - " & obj_Query("Caption"), True)
+                            sub_DebugMessage("ERROR: " & My.Resources.usbDeviceDescription & " " &
+                                             My.Resources.usbDeviceConnectedStartup & " " &
+                                             My.Resources.usbDeviceSMARTFail1 &
+                                             vbNewLine & vbNewLine & My.Resources.usbDeviceSMARTFail2 & vbNewLine &
+                                             func_USBGetDriveLetter(obj_Query("Name")) & " - " & obj_Query("Caption"),
+                                             True)
                     End Select
                 End If
             Next
@@ -494,7 +511,8 @@ Public Class form_Migration
         End Try
 
         ' *** Start watching USB device State Change Events
-        Dim wmiEventQuery As String = "SELECT * FROM __InstanceOperationEvent WITHIN 10 WHERE TargetInstance ISA ""Win32_DiskDrive"""
+        Dim wmiEventQuery As String =
+                "SELECT * FROM __InstanceOperationEvent WITHIN 10 WHERE TargetInstance ISA ""Win32_DiskDrive"""
         eventwatcher_USBStateChange = New ManagementEventWatcher(wmiEventQuery)
         sub_DebugMessage("Starting USB event watcher...")
         Try
@@ -503,11 +521,11 @@ Public Class form_Migration
         Catch ex As Exception
             sub_DebugMessage("ERROR: Failed to start USB event watcher. " & ex.Message)
         End Try
-
     End Sub
 
     ' Monitor USB State Change Events
-    Private Sub sub_USBStateChangeEvent(ByVal sender As Object, ByVal e As System.Management.EventArrivedEventArgs) Handles eventwatcher_USBStateChange.EventArrived
+    Private Sub sub_USBStateChangeEvent(sender As Object, e As EventArrivedEventArgs) _
+        Handles eventwatcher_USBStateChange.EventArrived
 
         sub_DebugMessage()
         sub_DebugMessage("* USB State Change Event *")
@@ -522,8 +540,10 @@ Public Class form_Migration
                 ' If creation event...
                 Case "__InstanceCreationEvent"
                     ' If this is a USB disk, and the size exceeds what is specified in the settings file
-                    If obj_Query("InterfaceType") = "USB" And (obj_Query("Size") / 1048576) >= int_MigrationMinUSBDiskSize Then
-                        sub_DebugMessage("Drive Found: " & func_USBGetDriveLetter(obj_Query("Name")) & " - " & obj_Query("Caption"))
+                    If obj_Query("InterfaceType") = "USB" And (obj_Query("Size")/1048576) >= int_MigrationMinUSBDiskSize _
+                        Then
+                        sub_DebugMessage(
+                            "Drive Found: " & func_USBGetDriveLetter(obj_Query("Name")) & " - " & obj_Query("Caption"))
                         ' Check SMART tolerences
                         sub_DebugMessage("Drive SMART Status: " & obj_Query("Status"))
                         Select Case obj_Query("Status")
@@ -533,39 +553,55 @@ Public Class form_Migration
                                     Case True
                                         ' Present option to use new drive instead
                                         sub_DebugMessage("User Dialog...")
-                                        Dim msgbox_Result As DialogResult = MsgBox(My.Resources.usbDeviceDescriptionAdditional & " " & _
-                                                        My.Resources.usbDeviceConnectedEvent & " " & My.Resources.usbDeviceUseDrive, _
-                                                        MsgBoxStyle.YesNo + MsgBoxStyle.SystemModal + MsgBoxStyle.Question, _
-                                                        func_USBGetDriveLetter(obj_Query("Name")) & " - " & obj_Query("Caption"))
+                                        Dim msgbox_Result As DialogResult =
+                                                MsgBox(My.Resources.usbDeviceDescriptionAdditional & " " &
+                                                       My.Resources.usbDeviceConnectedEvent & " " &
+                                                       My.Resources.usbDeviceUseDrive,
+                                                       MsgBoxStyle.YesNo + MsgBoxStyle.SystemModal +
+                                                       MsgBoxStyle.Question,
+                                                       func_USBGetDriveLetter(obj_Query("Name")) & " - " &
+                                                       obj_Query("Caption"))
                                         Select Case msgbox_Result
                                             ' Set new USB drive location
-                                            Case Windows.Forms.DialogResult.Yes
-                                                str_MigrationLocationUSB = Path.GetFullPath(func_USBGetDriveLetter(obj_Query("Name")))
-                                                sub_DebugMessage("User chose to use drive: " & func_USBGetDriveLetter(obj_Query("Name")))
+                                            Case DialogResult.Yes
+                                                str_MigrationLocationUSB =
+                                                    Path.GetFullPath(func_USBGetDriveLetter(obj_Query("Name")))
+                                                sub_DebugMessage(
+                                                    "User chose to use drive: " &
+                                                    func_USBGetDriveLetter(obj_Query("Name")))
                                                 Exit Sub
                                             Case Else
-                                                sub_DebugMessage("User chose not to use drive: " & func_USBGetDriveLetter(obj_Query("Name")))
+                                                sub_DebugMessage(
+                                                    "User chose not to use drive: " &
+                                                    func_USBGetDriveLetter(obj_Query("Name")))
                                         End Select
                                         ' Present option to use drive
                                     Case False
-                                        Dim msgbox_Result As DialogResult = MsgBox(My.Resources.usbDeviceDescription & " " & _
-                                                        My.Resources.usbDeviceConnectedEvent & " " & My.Resources.usbDeviceUseDrive, _
-                                                        MsgBoxStyle.YesNo + MsgBoxStyle.SystemModal + MsgBoxStyle.Question, _
-                                                        func_USBGetDriveLetter(obj_Query("Name")) & " - " & obj_Query("Caption"))
+                                        Dim msgbox_Result As DialogResult =
+                                                MsgBox(My.Resources.usbDeviceDescription & " " &
+                                                       My.Resources.usbDeviceConnectedEvent & " " &
+                                                       My.Resources.usbDeviceUseDrive,
+                                                       MsgBoxStyle.YesNo + MsgBoxStyle.SystemModal +
+                                                       MsgBoxStyle.Question,
+                                                       func_USBGetDriveLetter(obj_Query("Name")) & " - " &
+                                                       obj_Query("Caption"))
                                         Select Case msgbox_Result
                                             ' Set useUSBMigrationLocation to true and set new USB drive location
-                                            Case Windows.Forms.DialogResult.Yes
+                                            Case DialogResult.Yes
                                                 bln_MigrationLocationUseUSB = True
-                                                str_MigrationLocationUSB = Path.GetFullPath(func_USBGetDriveLetter(obj_Query("Name")))
+                                                str_MigrationLocationUSB =
+                                                    Path.GetFullPath(func_USBGetDriveLetter(obj_Query("Name")))
                                                 Exit Sub
                                         End Select
                                 End Select
                             Case Else
                                 ' Display error about drive
-                                sub_DebugMessage("ERROR: " & My.Resources.usbDeviceDescription & " " & _
-                                        My.Resources.usbDeviceConnectedEvent & " " & My.Resources.usbDeviceSMARTFail1 & _
-                                        vbNewLine & vbNewLine & My.Resources.usbDeviceSMARTFail2 & vbNewLine & _
-                                        func_USBGetDriveLetter(obj_Query("Name")) & " - " & obj_Query("Caption"), True)
+                                sub_DebugMessage("ERROR: " & My.Resources.usbDeviceDescription & " " &
+                                                 My.Resources.usbDeviceConnectedEvent & " " &
+                                                 My.Resources.usbDeviceSMARTFail1 &
+                                                 vbNewLine & vbNewLine & My.Resources.usbDeviceSMARTFail2 & vbNewLine &
+                                                 func_USBGetDriveLetter(obj_Query("Name")) & " - " &
+                                                 obj_Query("Caption"), True)
                         End Select
 
                     End If
@@ -575,21 +611,20 @@ Public Class form_Migration
                         sub_DebugMessage("USB drive has been removed. USB mode disabled")
                         ' Set usbUSBDrive to false and display message
                         bln_MigrationLocationUseUSB = False
-                        sub_DebugMessage("WARNING: " & My.Resources.usbDeviceDescriptionCurrent & " " & _
-                                My.Resources.usbDeviceDisconnectedEvent & " " & _
-                                vbNewLine & vbNewLine & My.Resources.usbDeviceSwitchToStandard & vbNewLine & _
-                                obj_Query("Caption"), True)
+                        sub_DebugMessage("WARNING: " & My.Resources.usbDeviceDescriptionCurrent & " " &
+                                         My.Resources.usbDeviceDisconnectedEvent & " " &
+                                         vbNewLine & vbNewLine & My.Resources.usbDeviceSwitchToStandard & vbNewLine &
+                                         obj_Query("Caption"), True)
                     End If
             End Select
 
         Catch ex As Exception
             sub_DebugMessage("ERROR: Failed to determine if USB drive was connected / disconnected. " & ex.Message)
         End Try
-
     End Sub
 
     ' Use WMI to get the Drive letter based on the passed in WMI Name
-    Private Function func_USBGetDriveLetter(ByVal Name As String) As String
+    Private Function func_USBGetDriveLetter(Name As String) As String
 
         Dim objquery_Partition, objquery_Disk As ObjectQuery
         Dim searcher_Partition, searcher_Disk As ManagementObjectSearcher
@@ -605,11 +640,17 @@ Public Class form_Migration
 
         Try
 
-            objquery_Partition = New ObjectQuery("ASSOCIATORS OF {Win32_DiskDrive.DeviceID=""" & Name & """} WHERE AssocClass = Win32_DiskDriveToDiskPartition")
+            objquery_Partition =
+                New ObjectQuery(
+                    "ASSOCIATORS OF {Win32_DiskDrive.DeviceID=""" & Name &
+                    """} WHERE AssocClass = Win32_DiskDriveToDiskPartition")
             searcher_Partition = New ManagementObjectSearcher(objquery_Partition)
             For Each obj_Partition In searcher_Partition.Get()
 
-                objquery_Disk = New ObjectQuery("ASSOCIATORS OF {Win32_DiskPartition.DeviceID=""" & obj_Partition("DeviceID") & """} WHERE AssocClass = Win32_LogicalDiskToPartition")
+                objquery_Disk =
+                    New ObjectQuery(
+                        "ASSOCIATORS OF {Win32_DiskPartition.DeviceID=""" & obj_Partition("DeviceID") &
+                        """} WHERE AssocClass = Win32_LogicalDiskToPartition")
                 searcher_Disk = New ManagementObjectSearcher(objquery_Disk)
                 For Each obj_Disk In searcher_Disk.Get()
                     str_Return &= obj_Disk("Name") & ","
@@ -622,7 +663,6 @@ Public Class form_Migration
         End Try
 
         Return str_Return.Trim(","c)
-
     End Function
 
 #End Region
@@ -656,7 +696,6 @@ Public Class form_Migration
             class_HealthCheck.SpinDown()
             Exit Sub
         End Try
-
     End Sub
 
     Private Sub sub_HealthCheckFinish() Handles class_HealthCheck.HealthCheckFinished
@@ -705,12 +744,16 @@ Public Class form_Migration
 
                         ' See if the user wants to fix the problem or continue
                         sub_DebugMessage("Prompting User for action...")
-                        Dim msgbox_Result As DialogResult = MsgBox(My.Resources.diskScanFixMessage, MsgBoxStyle.Exclamation + MsgBoxStyle.YesNoCancel, My.Resources.appTitle)
+                        Dim msgbox_Result As DialogResult = MsgBox(My.Resources.diskScanFixMessage,
+                                                                   MsgBoxStyle.Exclamation + MsgBoxStyle.YesNoCancel,
+                                                                   My.Resources.appTitle)
                         ' If yes, start CHKDSK
                         If msgbox_Result = MsgBoxResult.Yes Then
                             sub_DebugMessage("INFO: User chose to fix disk and reboot")
-                            System.Diagnostics.Process.Start("CMD", "/C Echo Y | CHKDSK /F /R")
-                            System.Diagnostics.Process.Start("Shutdown", "-R -T 10 -C ""CHKDSK Initialised by " & My.Resources.appTitle & ". Restarting Workstation""")
+                            Process.Start("CMD", "/C Echo Y | CHKDSK /F /R")
+                            Process.Start("Shutdown",
+                                          "-R -T 10 -C ""CHKDSK Initialised by " & My.Resources.appTitle &
+                                          ". Restarting Workstation""")
                             appShutdown(1)
                             ' If no, continue with the migration
                         ElseIf msgbox_Result = MsgBoxResult.No Then
@@ -744,7 +787,6 @@ Public Class form_Migration
             End If
 
         End If
-
     End Sub
 
     Private Sub sub_HealthCheckProgressMonitor() Handles class_HealthCheck.ProgressUpdate
@@ -756,8 +798,10 @@ Public Class form_Migration
 
             ' Get the current status
             If Not class_HealthCheck.Progress = Nothing Then
-                If Not class_HealthCheck.PercentComplete = Nothing Or class_HealthCheck.PercentComplete = Nothing = 0 Then
-                    str_StatusMessage = class_HealthCheck.Progress & " (" & class_HealthCheck.PercentComplete & My.Resources.diskScanPercent & ")"
+                If Not class_HealthCheck.PercentComplete = Nothing Or class_HealthCheck.PercentComplete = Nothing = 0 _
+                    Then
+                    str_StatusMessage = class_HealthCheck.Progress & " (" & class_HealthCheck.PercentComplete &
+                                        My.Resources.diskScanPercent & ")"
                 Else
                     str_StatusMessage = class_HealthCheck.Progress
                 End If
@@ -773,7 +817,6 @@ Public Class form_Migration
             str_PreviousStatusMessage = str_StatusMessage
 
         End If
-
     End Sub
 
 #End Region
@@ -827,7 +870,6 @@ Public Class form_Migration
                 sub_MigrationStart()
             End If
         End If
-
     End Sub
 
     Private Sub sub_MigrationSetup()
@@ -843,7 +885,8 @@ Public Class form_Migration
             arraylist_MigrationArguments.Add("/I:""" & Path.Combine(str_WMAFolder, ruleset.Trim) & """")
         Next
         If My.Computer.FileSystem.FileExists(Path.Combine(str_WMAFolder, str_MigrationConfigFile)) Then
-            sub_DebugMessage("Config file exists and will be used: " & Path.Combine(str_WMAFolder, str_MigrationConfigFile))
+            sub_DebugMessage(
+                "Config file exists and will be used: " & Path.Combine(str_WMAFolder, str_MigrationConfigFile))
             arraylist_MigrationArguments.Add("/Config:""" & Path.Combine(str_WMAFolder, str_MigrationConfigFile) & """")
         Else
             sub_DebugMessage("Config file does not exist. Standard migration will be performed")
@@ -861,7 +904,9 @@ Public Class form_Migration
                     sub_DebugMessage("Migrating from USB drive: " & str_MigrationLocationUSB)
                     str_MigrationFolder = str_MigrationLocationUSB
                 ElseIf bln_MigrationLocationNetworkDisabled Then
-                    sub_DebugMessage("ERROR: Network-based migrations have been disabled by your IT Administrator. A USB drive is required to proceed with the migration.", True)
+                    sub_DebugMessage(
+                        "ERROR: Network-based migrations have been disabled by your IT Administrator. A USB drive is required to proceed with the migration.",
+                        True)
                     bln_MigrationCancelled = True
                     Exit Sub
                 Else
@@ -872,7 +917,9 @@ Public Class form_Migration
                     End If
                     str_MigrationFolder = str_MigrationLocationNetwork
                     If Not My.Computer.FileSystem.DirectoryExists(str_MigrationFolder) Then
-                        sub_DebugMessage("ERROR: The Network-based migration location is not available. Please verify you have network connectivity. If the problem persists, contact your IT Administrator.", True)
+                        sub_DebugMessage(
+                            "ERROR: The Network-based migration location is not available. Please verify you have network connectivity. If the problem persists, contact your IT Administrator.",
+                            True)
                         bln_MigrationCancelled = True
                         Exit Sub
                     End If
@@ -880,26 +927,34 @@ Public Class form_Migration
 
                 ' *** Generate the folder name for the migration...
                 ' *** And verify it doesn't already exist...
-                If My.Computer.FileSystem.DirectoryExists(Path.Combine(str_MigrationFolder, str_EnvComputerName & "_" & str_EnvUserName)) Then
+                If _
+                    My.Computer.FileSystem.DirectoryExists(Path.Combine(str_MigrationFolder,
+                                                                        str_EnvComputerName & "_" & str_EnvUserName)) _
+                    Then
                     Try
                         If Not bln_MigrationOverwriteExistingFolders Then
                             ' Present option to remove existing migration information
-                            Dim msgbox_Result As DialogResult = MsgBox(My.Resources.migrationOverwriteExistingFolder, _
-                                            MsgBoxStyle.YesNo + MsgBoxStyle.SystemModal + MsgBoxStyle.Question, _
-                                            str_EnvComputerName & "_" & str_EnvUserName)
+                            Dim msgbox_Result As DialogResult = MsgBox(My.Resources.migrationOverwriteExistingFolder,
+                                                                       MsgBoxStyle.YesNo + MsgBoxStyle.SystemModal +
+                                                                       MsgBoxStyle.Question,
+                                                                       str_EnvComputerName & "_" & str_EnvUserName)
                             Select Case msgbox_Result
-                                Case Windows.Forms.DialogResult.Yes
-                                    My.Computer.FileSystem.DeleteDirectory(Path.Combine(str_MigrationFolder, str_EnvComputerName & "_" & str_EnvUserName), FileIO.DeleteDirectoryOption.DeleteAllContents)
+                                Case DialogResult.Yes
+                                    My.Computer.FileSystem.DeleteDirectory(
+                                        Path.Combine(str_MigrationFolder, str_EnvComputerName & "_" & str_EnvUserName),
+                                        DeleteDirectoryOption.DeleteAllContents)
                             End Select
                         Else
-                            My.Computer.FileSystem.DeleteDirectory(Path.Combine(str_MigrationFolder, str_EnvComputerName & "_" & str_EnvUserName), FileIO.DeleteDirectoryOption.DeleteAllContents)
+                            My.Computer.FileSystem.DeleteDirectory(
+                                Path.Combine(str_MigrationFolder, str_EnvComputerName & "_" & str_EnvUserName),
+                                DeleteDirectoryOption.DeleteAllContents)
                         End If
-                    Catch exPrivilege As System.Security.AccessControl.PrivilegeNotHeldException
-                        sub_DebugMessage("ERROR: " & My.Resources.migrationDeleteExistingError & vbNewLine & vbNewLine & _
-                                exPrivilege.Message, True)
+                    Catch exPrivilege As PrivilegeNotHeldException
+                        sub_DebugMessage("ERROR: " & My.Resources.migrationDeleteExistingError & vbNewLine & vbNewLine &
+                                         exPrivilege.Message, True)
                     Catch ex As Exception
-                        sub_DebugMessage("ERROR: " & My.Resources.migrationDeleteExistingError & vbNewLine & vbNewLine & _
-                                ex.Message, True)
+                        sub_DebugMessage("ERROR: " & My.Resources.migrationDeleteExistingError & vbNewLine & vbNewLine &
+                                         ex.Message, True)
                     End Try
                 End If
 
@@ -935,7 +990,8 @@ Public Class form_Migration
                     Else
                         ' Exclude local accounts specified in settings file
                         For Each exclusion As String In array_MigrationExclusionsLocal
-                            arraylist_MigrationArguments.Add("/UE:""" & str_EnvComputerName & "\" & exclusion.Trim & """")
+                            arraylist_MigrationArguments.Add(
+                                "/UE:""" & str_EnvComputerName & "\" & exclusion.Trim & """")
                         Next
                     End If
                 End If
@@ -990,13 +1046,13 @@ Public Class form_Migration
                 Else
                     formCustomEncryption.tbxCustomEncryptionKey1.Text = str_customEncryptionKey
                     ' Set scanstate arguments to use custom encryption key (built from standard key, and user specified)
-                    arraylist_MigrationArguments.Add("/Key:""" & str_MigrationEncryptionDefaultKey & str_customEncryptionKey & """")
+                    arraylist_MigrationArguments.Add(
+                        "/Key:""" & str_MigrationEncryptionDefaultKey & str_customEncryptionKey & """")
                 End If
             End If
         End If
 
         arraylist_MigrationArguments.Add("/V:" & int_MigrationUSMTLoggingType)
-
     End Sub
 
     Private Sub sub_MigrationStart()
@@ -1045,7 +1101,6 @@ Public Class form_Migration
             class_Migration.SpinDown()
             Exit Sub
         End Try
-
     End Sub
 
     Private Sub sub_MigrationFinish() Handles class_Migration.MigrationFinished
@@ -1070,7 +1125,9 @@ Public Class form_Migration
                         bln_MigrationStatusOk = True
                         ' Check if an abort has occurred and end the migration
                     Case 12
-                        Throw New Exception("You must be an administrator to migrate one or more of the files or settings that are in the store. Log on as an administrator and try again.")
+                        Throw _
+                            New Exception(
+                                "You must be an administrator to migrate one or more of the files or settings that are in the store. Log on as an administrator and try again.")
                     Case 999
                         bln_MigrationCancelled = True
                         Throw New Exception("Migration Cancelled")
@@ -1100,7 +1157,10 @@ Public Class form_Migration
             ' Write WMA XML Log File
             Try
                 sub_DebugMessage("Building XML Log File...")
-                Dim xml_LogFile As XmlTextWriter = New XmlTextWriter(Path.Combine(str_MigrationFolder, str_MigrationLoggingFolder) & "\WMA_" & str_MigrationType & ".XML", Nothing)
+                Dim xml_LogFile As XmlTextWriter =
+                        New XmlTextWriter(
+                            Path.Combine(str_MigrationFolder, str_MigrationLoggingFolder) & "\WMA_" & str_MigrationType &
+                            ".XML", Nothing)
                 xml_LogFile.WriteStartDocument()
                 xml_LogFile.WriteComment(My.Resources.appTitle & " " & My.Resources.appBuild)
                 xml_LogFile.WriteStartElement("MigAssistant")
@@ -1155,9 +1215,11 @@ Public Class form_Migration
                         email.From = str_MailFrom
 
                         If bln_MigrationStatusOk Then
-                            email.Subject = "MigAssistant Success - " & str_MigrationType & ": " & str_EnvUserName & " (" & str_EnvComputerName & ")"
+                            email.Subject = "MigAssistant Success - " & str_MigrationType & ": " & str_EnvUserName &
+                                            " (" & str_EnvComputerName & ")"
                         Else
-                            email.Subject = "MigAsssitant Failure - " & str_MigrationType & ": " & str_EnvUserName & " (" & str_EnvComputerName & ")"
+                            email.Subject = "MigAsssitant Failure - " & str_MigrationType & ": " & str_EnvUserName &
+                                            " (" & str_EnvComputerName & ")"
                         End If
 
                         email.Message = My.Resources.mailMessage
@@ -1165,16 +1227,29 @@ Public Class form_Migration
                         ' Add attachments
                         Dim attachmentArray As New ArrayList
                         ' Add WMA XML Logfiles if found
-                        If My.Computer.FileSystem.FileExists(Path.Combine(str_MigrationFolder, str_MigrationLoggingFolder) & "\WMA_" & str_MigrationType & ".XML") Then
-                            attachmentArray.Add(Path.Combine(str_MigrationFolder, str_MigrationLoggingFolder & "\WMA_" & str_MigrationType & ".XML"))
+                        If _
+                            My.Computer.FileSystem.FileExists(
+                                Path.Combine(str_MigrationFolder, str_MigrationLoggingFolder) & "\WMA_" &
+                                str_MigrationType & ".XML") Then
+                            attachmentArray.Add(Path.Combine(str_MigrationFolder,
+                                                             str_MigrationLoggingFolder & "\WMA_" & str_MigrationType &
+                                                             ".XML"))
                         End If
                         ' Add Migration Logfiles if found
-                        If My.Computer.FileSystem.FileExists(Path.Combine(str_MigrationFolder, str_MigrationLoggingFolder) & "\" & str_MigrationType & ".Log") Then
-                            attachmentArray.Add(Path.Combine(str_MigrationFolder, str_MigrationLoggingFolder & "\" & str_MigrationType & ".Log"))
+                        If _
+                            My.Computer.FileSystem.FileExists(
+                                Path.Combine(str_MigrationFolder, str_MigrationLoggingFolder) & "\" & str_MigrationType &
+                                ".Log") Then
+                            attachmentArray.Add(Path.Combine(str_MigrationFolder,
+                                                             str_MigrationLoggingFolder & "\" & str_MigrationType &
+                                                             ".Log"))
                         End If
                         ' Add Migration Progress Logfiles if found
-                        If My.Computer.FileSystem.FileExists(Path.Combine(str_MigrationFolder, str_MigrationLoggingFolder) & "_Progress.Log") Then
-                            attachmentArray.Add(Path.Combine(str_MigrationFolder, str_MigrationLoggingFolder & "_Progress.Log"))
+                        If _
+                            My.Computer.FileSystem.FileExists(
+                                Path.Combine(str_MigrationFolder, str_MigrationLoggingFolder) & "_Progress.Log") Then
+                            attachmentArray.Add(Path.Combine(str_MigrationFolder,
+                                                             str_MigrationLoggingFolder & "_Progress.Log"))
                         End If
                         ' Add the debug Logfile if found (by generating a copy)
                         If My.Computer.FileSystem.FileExists(str_LogFile) Then
@@ -1221,7 +1296,6 @@ Public Class form_Migration
             sub_SupportFormControlsReset()
 
         End If
-
     End Sub
 
     Private Sub sub_SupportFormControlsReset()
@@ -1230,7 +1304,8 @@ Public Class form_Migration
         sub_DebugMessage("* Form Controls Reset *")
 
         ' Focus the application and reset the in progress items
-        Me.TopMost = True : Me.TopMost = False
+        Me.TopMost = True
+        Me.TopMost = False
 
         ' If cancelled, update Status
         If bln_MigrationCancelled Then
@@ -1251,7 +1326,6 @@ Public Class form_Migration
         ' Remove unwanted text
         label_MigrationEstSize.Text = Nothing
         label_MigrationEstTimeRemaining.Text = Nothing
-
     End Sub
 
     Private Sub sub_MigrationProgressMonitor() Handles class_Migration.ProgressUpdate
@@ -1265,21 +1339,31 @@ Public Class form_Migration
 
                 ' Update form from class information
                 If Not class_Migration.EstTimeRemaining = 0 Then
-                    label_MigrationEstTimeRemaining.Text = class_Migration.EstTimeRemaining & " " & My.Resources.migrationTotalMinutesRemaining
+                    label_MigrationEstTimeRemaining.Text = class_Migration.EstTimeRemaining & " " &
+                                                           My.Resources.migrationTotalMinutesRemaining
                 End If
                 If Not class_Migration.EstDataSize = 0 Then
-                    label_MigrationEstSize.Text = class_Migration.EstDataSize & My.Resources.migrationTotalSizeInMBToTransfer
+                    label_MigrationEstSize.Text = class_Migration.EstDataSize &
+                                                  My.Resources.migrationTotalSizeInMBToTransfer
                     ' Check if a ScanState is being performed
                     If str_MigrationType = "SCANSTATE" Then
                         If Not bln_SizeChecksDone Then
                             ' If not overridden via commandline, check the migration size is not exceeded
                             If (int_MigrationMaxSize > 0 And Not bln_migrationMaxOverride) Then
                                 If class_Migration.EstDataSize > int_MigrationMaxSize Then
-                                    Throw New Exception("ERROR: The amount of data to be migrated exceeds the maximum allowed size. Please remove any unnecessary data and try again." & vbNewLine & vbNewLine & "Current: " & class_Migration.EstDataSize & "MB" & vbNewLine & "Maximum: " & int_MigrationMaxSize & "MB")
+                                    Throw _
+                                        New Exception(
+                                            "ERROR: The amount of data to be migrated exceeds the maximum allowed size. Please remove any unnecessary data and try again." &
+                                            vbNewLine & vbNewLine & "Current: " & class_Migration.EstDataSize & "MB" &
+                                            vbNewLine & "Maximum: " & int_MigrationMaxSize & "MB")
                                 End If
                             End If
                             If class_Migration.EstDataSize > func_GetFreeSpace(str_MigrationFolder) Then
-                                Throw New Exception("ERROR: There is not enough space available to perform the migration. Estimated Migration Size: " & class_Migration.EstDataSize & "MB. Available Space: " & func_GetFreeSpace(str_MigrationFolder) & "MB")
+                                Throw _
+                                    New Exception(
+                                        "ERROR: There is not enough space available to perform the migration. Estimated Migration Size: " &
+                                        class_Migration.EstDataSize & "MB. Available Space: " &
+                                        func_GetFreeSpace(str_MigrationFolder) & "MB")
                             End If
                             bln_SizeChecksDone = True
                         End If
@@ -1287,7 +1371,8 @@ Public Class form_Migration
                 End If
                 ' Get current status
                 If Not class_Migration.PercentComplete = 0 Then
-                    str_StatusMessage = class_Migration.Progress & " (" & class_Migration.PercentComplete & My.Resources.migrationTotalPercentageCompleted & ")"
+                    str_StatusMessage = class_Migration.Progress & " (" & class_Migration.PercentComplete &
+                                        My.Resources.migrationTotalPercentageCompleted & ")"
                 Else
                     str_StatusMessage = class_Migration.Progress
                 End If
@@ -1301,7 +1386,7 @@ Public Class form_Migration
 
                 str_PreviousStatusMessage = str_StatusMessage
 
-                End If
+            End If
 
         Catch ex As Exception
             sub_DebugMessage(ex.Message, True)
@@ -1309,10 +1394,9 @@ Public Class form_Migration
             class_Migration.SpinDown()
             Exit Sub
         End Try
-
     End Sub
 
-    Private Sub sub_MigrationCreateFolderStructure(ByVal folderStructure As String)
+    Private Sub sub_MigrationCreateFolderStructure(folderStructure As String)
         Dim array_Folder() As String
         Dim str_FolderBuild As String = Nothing
         Dim i As Integer
@@ -1351,7 +1435,9 @@ Public Class form_Migration
 
         ' Check that WMA is configured correctly
         If Not func_InitCheckForValidConfiguration() Then
-            sub_DebugMessage("ERROR: It looks like you haven't yet modified the WMA configuration file (MigAssistant.Exe.Config). As a result, it is not possible to perform a restore!", True)
+            sub_DebugMessage(
+                "ERROR: It looks like you haven't yet modified the WMA configuration file (MigAssistant.Exe.Config). As a result, it is not possible to perform a restore!",
+                True)
             tabcontrol_MigrationType.SelectedTab = tabpage_Capture
             Exit Sub
         End If
@@ -1386,12 +1472,13 @@ Public Class form_Migration
         Try
             ' Check for username in all migration folders
             sub_DebugMessage("Checking for username in all migration folders...")
-            Dim col_MigrationFolders As System.Collections.ObjectModel.ReadOnlyCollection(Of String) = My.Computer.FileSystem.GetDirectories(str_MigrationFolder)
+            Dim col_MigrationFolders As ReadOnlyCollection(Of String) =
+                    My.Computer.FileSystem.GetDirectories(str_MigrationFolder)
             Dim arraylist_Folders As New ArrayList
             arraylist_Folders.Clear()
             For Each str_FolderSearch As String In col_MigrationFolders
                 'folder = Replace(folder, str_MigrationFolder & "\", "")
-                str_FolderSearch = Replace(str_FolderSearch, str_MigrationFolder & "\", "", 1, -1, CompareMethod.Text)
+                str_FolderSearch = Replace(str_FolderSearch, str_MigrationFolder & "\", "", 1, - 1, CompareMethod.Text)
                 If InStr(str_FolderSearch, str_EnvUserName, CompareMethod.Text) Then
                     arraylist_Folders.Add(str_FolderSearch)
                     sub_DebugMessage("Match Found: " & str_FolderSearch)
@@ -1411,7 +1498,8 @@ Public Class form_Migration
                     For Each folderTmp As String In arraylist_Folders
                         formRestoreMultiDatastore.cbxRestoreMultiDatastoreList.Items.Add(folderTmp)
                     Next
-                    formRestoreMultiDatastore.cbxRestoreMultiDatastoreList.SelectedItem = formRestoreMultiDatastore.cbxRestoreMultiDatastoreList.Items(0)
+                    formRestoreMultiDatastore.cbxRestoreMultiDatastoreList.SelectedItem =
+                        formRestoreMultiDatastore.cbxRestoreMultiDatastoreList.Items(0)
                     formRestoreMultiDatastore.ShowDialog()
                     str_TempMigrationFolder = formRestoreMultiDatastore.cbxRestoreMultiDatastoreList.SelectedItem
                     If str_TempMigrationFolder = Nothing Then
@@ -1436,15 +1524,19 @@ Public Class form_Migration
             xml_Document = Nothing
             For Each Xml_Node As XmlNode In xml_Nodes
                 bln_MigrationSettingsAllUsers = Xml_Node.Item("Options").Attributes.GetNamedItem("AllUsers").Value
-                bln_MigrationCompressionDisabled = Xml_Node.Item("Options").Attributes.GetNamedItem("CompressionDisabled").Value
-                bln_MigrationEncryptionDisabled = Xml_Node.Item("Options").Attributes.GetNamedItem("EncryptionDisabled").Value
+                bln_MigrationCompressionDisabled =
+                    Xml_Node.Item("Options").Attributes.GetNamedItem("CompressionDisabled").Value
+                bln_MigrationEncryptionDisabled =
+                    Xml_Node.Item("Options").Attributes.GetNamedItem("EncryptionDisabled").Value
                 If Not bln_MigrationEncryptionDisabled Then
-                    bln_MigrationEncryptionCustom = Xml_Node.Item("Options").Attributes.GetNamedItem("EncryptionCustom").Value
+                    bln_MigrationEncryptionCustom =
+                        Xml_Node.Item("Options").Attributes.GetNamedItem("EncryptionCustom").Value
                     If bln_MigrationEncryptionCustom Then
                         formCustomEncryption.ShowDialog()
                     End If
                 End If
-                Dim int_MigrationDataSize As Integer = Xml_Node.Item("SCANSTATE").Attributes.GetNamedItem("DataSize").Value
+                Dim int_MigrationDataSize As Integer =
+                        Xml_Node.Item("SCANSTATE").Attributes.GetNamedItem("DataSize").Value
                 If str_PrimaryDataDrive = Nothing Then str_PrimaryDataDrive = "C:"
                 If int_MigrationDataSize > func_GetFreeSpace(str_PrimaryDataDrive) Then
                     Throw New Exception("There is not enough free space on this drive to perform the migration")
@@ -1455,10 +1547,9 @@ Public Class form_Migration
             sub_DebugMessage("ERROR: While parsing WMA_SCANSTATE.XML: " & ex.Message, True)
             appShutdown(30)
         End Try
-
     End Sub
 
-    Private Function func_MigrationSupportScripts(ByVal migrationTimeLine As String) As Boolean
+    Private Function func_MigrationSupportScripts(migrationTimeLine As String) As Boolean
         arraylist_ScriptsCurrent.Clear()
 
         Select Case str_MigrationType
@@ -1503,14 +1594,15 @@ Public Class form_Migration
         ' Otherwise, process each script and return if one of them fails
         For Each script As String In arraylist_ScriptsCurrent
             sub_DebugMessage(migrationTimeLine & "-Migration Script: " & script.Remove(script.Length - 4) & "...")
-            label_MigrationCurrentPhase.Text = migrationTimeLine & "-Migration Script: " & script.Remove(script.Length - 4) & "..."
+            label_MigrationCurrentPhase.Text = migrationTimeLine & "-Migration Script: " &
+                                               script.Remove(script.Length - 4) & "..."
             Application.DoEvents()
             Dim process As New Process
             Dim processInfo As New ProcessStartInfo()
             Dim str_TempFileCheck As String = Nothing
-            Dim str_MigrationScriptArguments As String = _
-                    "/USER " & str_EnvUserName & " " & _
-                    "/COMPUTER " & str_EnvComputerName & " " & _
+            Dim str_MigrationScriptArguments As String =
+                    "/USER " & str_EnvUserName & " " &
+                    "/COMPUTER " & str_EnvComputerName & " " &
                     "/MIGFOLDER " & str_MigrationFolder & " "
             str_TempFileCheck = script.Substring(script.Length - 3)
             Select Case str_TempFileCheck.ToUpper
@@ -1520,7 +1612,8 @@ Public Class form_Migration
                     processInfo.CreateNoWindow = bln_MigrationScriptsNoWindow
                 Case "PS1"
                     processInfo.FileName = "PowerShell.Exe"
-                    processInfo.Arguments = "-ExecutionPolicy Bypass -File """ & script & """ " & str_MigrationScriptArguments
+                    processInfo.Arguments = "-ExecutionPolicy Bypass -File """ & script & """ " &
+                                            str_MigrationScriptArguments
                     processInfo.CreateNoWindow = bln_MigrationScriptsNoWindow
                 Case Else
                     processInfo.FileName = script
@@ -1552,9 +1645,7 @@ Public Class form_Migration
         Next
 
         Return False
-
     End Function
 
 #End Region
-
 End Class

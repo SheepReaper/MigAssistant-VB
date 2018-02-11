@@ -1,4 +1,3 @@
-Imports System
 Imports System.Threading
 
 Public Class classHealthCheck
@@ -18,22 +17,25 @@ Public Class classHealthCheck
 #Region "Properties"
 
     ' Property: Return Yes / No as to whether the scan is in progress
-    Public ReadOnly Property InProgress() As Boolean
+    Public ReadOnly Property InProgress As Boolean
         Get
             Return _bln_HealthCheckInProgress
         End Get
     End Property
-    Public ReadOnly Property ExitCode() As Integer
+
+    Public ReadOnly Property ExitCode As Integer
         Get
             Return _int_HealthCheckExitCode
         End Get
     End Property
-    Public ReadOnly Property Progress() As String
+
+    Public ReadOnly Property Progress As String
         Get
             Return _str_HealthCheckProgress
         End Get
     End Property
-    Public ReadOnly Property PercentComplete() As Integer
+
+    Public ReadOnly Property PercentComplete As Integer
         Get
             Return _int_HealthCheckPercentComplete
         End Get
@@ -103,7 +105,6 @@ Public Class classHealthCheck
         Dim ThreadStart As New ThreadStart(AddressOf Me.Start)
         _thread = New Thread(ThreadStart)
         _thread.Start()
-
     End Sub
 
     Public Sub SpinDown()
@@ -125,32 +126,35 @@ Public Class classHealthCheck
         Catch ex As Exception
 
         End Try
-
     End Sub
 
     Private Sub _sub_HealthCheckProgressReturn()
 
         If Not _str_HealthCheckOutput = Nothing Then
-            If _str_HealthCheckOutput.Contains("file records") Or _str_HealthCheckOutput.Contains("parameter specified") Then
+            If _str_HealthCheckOutput.Contains("file records") Or _str_HealthCheckOutput.Contains("parameter specified") _
+                Then
                 _int_HealthCheckPercentComplete = 0
                 _str_HealthCheckProgress = My.Resources.diskScanStatus1
-            ElseIf _str_HealthCheckOutput.Contains("index entries") Or _str_HealthCheckOutput.Contains("verifying indexes") Then
+            ElseIf _
+                _str_HealthCheckOutput.Contains("index entries") Or _str_HealthCheckOutput.Contains("verifying indexes") _
+                Then
                 _int_HealthCheckPercentComplete = 0
                 _str_HealthCheckProgress = My.Resources.diskScanStatus2
-            ElseIf _str_HealthCheckOutput.Contains("descriptors") Or _str_HealthCheckOutput.Contains("verification completed") Then
+            ElseIf _
+                _str_HealthCheckOutput.Contains("descriptors") Or
+                _str_HealthCheckOutput.Contains("verification completed") Then
                 _int_HealthCheckPercentComplete = 0
                 _str_HealthCheckProgress = My.Resources.diskScanStatus3
             End If
             If _str_HealthCheckOutput.Contains("percent complete") Then
-                _int_HealthCheckPercentComplete = _str_HealthCheckOutput.Substring(0, 2).Trim.Replace(".", strLocaleDecimal)
+                _int_HealthCheckPercentComplete = _str_HealthCheckOutput.Substring(0, 2).Trim.Replace(".",
+                                                                                                      strLocaleDecimal)
             End If
         End If
 
         ' Raise event that the progress has changed
         If _bln_HealthCheckInProgress Then RaiseEvent ProgressUpdate()
-
     End Sub
 
 #End Region
-
 End Class

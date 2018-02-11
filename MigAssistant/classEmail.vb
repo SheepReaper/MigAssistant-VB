@@ -1,5 +1,5 @@
-Imports Microsoft.VisualBasic
-Imports System.net.Mail
+Imports System.Net.Mail
+Imports System.Text
 
 Public Class classEmail
     Private _str_MailServer As String
@@ -9,60 +9,66 @@ Public Class classEmail
     Private _str_MailMessage As String
     Private _str_MailAttachments As String
 
-    Public Property Server() As String
+    Public Property Server As String
         Get
             Return _str_MailServer
         End Get
-        Set(ByVal value As String)
+        Set
             _str_MailServer = value
         End Set
     End Property
-    Public Property Recipients() As String
+
+    Public Property Recipients As String
         Get
             Return _str_MailRecipients
         End Get
-        Set(ByVal value As String)
+        Set
             _str_MailRecipients = value
         End Set
     End Property
-    Public Property From() As String
+
+    Public Property From As String
         Get
             Return _str_MailFrom
         End Get
-        Set(ByVal value As String)
+        Set
             _str_MailFrom = value
         End Set
     End Property
-    Public Property Subject() As String
+
+    Public Property Subject As String
         Get
             Return _str_MailSubject
         End Get
-        Set(ByVal value As String)
+        Set
             _str_MailSubject = value
         End Set
     End Property
-    Public Property Message() As String
+
+    Public Property Message As String
         Get
             Return _str_MailMessage
         End Get
-        Set(ByVal value As String)
+        Set
             _str_MailMessage = value
         End Set
     End Property
-    Public Property Attachments() As String
+
+    Public Property Attachments As String
         Get
             Return _str_MailAttachments
         End Get
-        Set(ByVal value As String)
+        Set
             _str_MailAttachments = value
         End Set
     End Property
+
     Public Sub Send()
         'This procedure takes string array parameters for multiple recipients and files
         Try
             'For each to address create a mail message
             Dim Message As New MailMessage
-            Message.BodyEncoding = System.Text.Encoding.Default
+            Message.BodyEncoding = Encoding.Default
             Message.Subject = _str_MailSubject.Trim()
             Message.Body = _str_MailMessage.Trim() & vbCrLf
             Message.From = New MailAddress(_str_MailFrom.Trim())
@@ -96,5 +102,4 @@ Public Class classEmail
             Throw New Exception(ex.Message)
         End Try
     End Sub
-
 End Class

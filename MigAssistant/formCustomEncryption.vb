@@ -1,12 +1,12 @@
-Public Class formCustomEncryption
+Imports System.ComponentModel
 
-    Private Sub btnAdvancedSettingsClose_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnCustomEncryptionClose.Click
+Public Class formCustomEncryption
+    Private Sub btnAdvancedSettingsClose_Click(sender As Object, e As EventArgs) Handles btnCustomEncryptionClose.Click
 
         Me.Close()
-
     End Sub
 
-    Public Sub form_Closing(ByVal sender As Object, ByVal e As System.ComponentModel.CancelEventArgs) Handles MyBase.Closing
+    Public Sub form_Closing(sender As Object, e As CancelEventArgs) Handles MyBase.Closing
 
         Select Case str_MigrationType
             Case "SCANSTATE"
@@ -47,6 +47,5 @@ Public Class formCustomEncryption
                 Me.Hide()
 
         End Select
-
     End Sub
 End Class

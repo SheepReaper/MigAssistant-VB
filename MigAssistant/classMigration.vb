@@ -1,5 +1,6 @@
 Imports System.IO
 Imports System.Threading
+Imports Microsoft.VisualBasic.FileIO
 
 Public Class classMigration
 
@@ -20,7 +21,7 @@ Public Class classMigration
     Private _int_MigrationEstTimeRemaining As Integer = 0
     Private _int_MigrationPercentComplete As Integer = 0
     Private _str_MigrationProgressFile As String = Nothing
-    Private _io_MigrationProgressFileParser As Microsoft.VisualBasic.FileIO.TextFieldParser
+    Private _io_MigrationProgressFileParser As TextFieldParser
     Private _int_MigrationProgressFileLastLineNumber As Integer = 0
     Private _bln_MigrationProgressCheckInProgress As Boolean = False
     Private _str_MigrationType As String = Nothing
@@ -31,71 +32,72 @@ Public Class classMigration
 
 #Region "Properties"
     ' Property: Return the argument list for USMT
-    Public Property Arguments() As ArrayList
+    Public Property Arguments As ArrayList
         Get
             Return _arraylist_MigrationArguments
         End Get
-        Set(ByVal value As ArrayList)
+        Set
             _arraylist_MigrationArguments = value
         End Set
     End Property
     ' Property: Return the migration type
-    Public Property Type() As String
+    Public Property Type As String
         Get
             Return _str_MigrationType
         End Get
-        Set(ByVal value As String)
+        Set
             _str_MigrationType = value
         End Set
     End Property
     ' Property: Return whether the migration is in progress
-    Public ReadOnly Property InProgress() As Boolean
+    Public ReadOnly Property InProgress As Boolean
         Get
             Return _bln_MigrationInProgress
         End Get
     End Property
     ' Property: Return the migration current progress
-    Public ReadOnly Property Progress()
+    Public ReadOnly Property Progress As String
         Get
             Return _str_MigrationProgress
         End Get
     End Property
     ' Property: Return the migration exit code
-    Public ReadOnly Property ExitCode()
+    Public ReadOnly Property ExitCode As Integer
         Get
             Return _int_MigrationExitCode
         End Get
     End Property
     ' Property: Return the migration current debug info
-    Public ReadOnly Property DebugInfo()
+    Public ReadOnly Property DebugInfo As String
         Get
             Return _str_MigrationDebugInfo
         End Get
     End Property
     ' Property: Return the migration data size
-    Public ReadOnly Property EstDataSize()
+    Public ReadOnly Property EstDataSize As Integer
         Get
             Return _int_MigrationEstDataSize
         End Get
     End Property
     ' Property: Return the migration minutes remaining
-    Public ReadOnly Property EstTimeRemaining()
+    Public ReadOnly Property EstTimeRemaining As Integer
         Get
             Return _int_MigrationEstTimeRemaining
         End Get
     End Property
     ' Property: Return the migration percent complete
-    Public ReadOnly Property PercentComplete()
+    Public ReadOnly Property PercentComplete As Integer
         Get
             Return _int_MigrationPercentComplete
         End Get
     End Property
     ' Property: Return the path to the migration log file
-    Public ReadOnly Property LogFile()
+    Public ReadOnly Property LogFile As String
         Get
             Return str_MigrationFolder & "\" & str_MigrationLoggingFolder & "\" & _str_MigrationLogFile
         End Get
     End Property
+
 #End Region
 
 #Region "Events"
@@ -110,23 +112,26 @@ Public Class classMigration
     Private Sub Start()
         Try
             ' If the Migration Progress File exists, delete it
-            If My.Computer.FileSystem.FileExists(str_MigrationFolder & "\" & _
-                    str_MigrationLoggingFolder & "\" & _str_MigrationProgressFile) Then
-                My.Computer.FileSystem.DeleteFile(str_MigrationFolder & "\" & _
-                        str_MigrationLoggingFolder & "\" & _str_MigrationProgressFile)
+            If My.Computer.FileSystem.FileExists(str_MigrationFolder & "\" &
+                                                 str_MigrationLoggingFolder & "\" & _str_MigrationProgressFile) Then
+                My.Computer.FileSystem.DeleteFile(str_MigrationFolder & "\" &
+                                                  str_MigrationLoggingFolder & "\" & _str_MigrationProgressFile)
             End If
 
             ' Add Progress and Logfile details to the argument list
-            _arraylist_MigrationArguments.Add("/Progress:""" & str_MigrationFolder & "\" & str_MigrationLoggingFolder & "\" & _str_MigrationProgressFile & """")
-            _arraylist_MigrationArguments.Add("/L:""" & str_MigrationFolder & "\" & str_MigrationLoggingFolder & "\" & _str_MigrationLogFile & """")
+            _arraylist_MigrationArguments.Add(
+                "/Progress:""" & str_MigrationFolder & "\" & str_MigrationLoggingFolder & "\" &
+                _str_MigrationProgressFile & """")
+            _arraylist_MigrationArguments.Add(
+                "/L:""" & str_MigrationFolder & "\" & str_MigrationLoggingFolder & "\" & _str_MigrationLogFile & """")
             ' Sort and Dump the arguments from the array into a string containing spaces
             _arraylist_MigrationArguments.Sort()
             _str_MigrationArguments = Join(_arraylist_MigrationArguments.ToArray, " ")
 
             ' Setup and configure the new process
             _process = New Process
-            Dim _processInfo As New ProcessStartInfo(str_USMTFolder & "\" & _
-                    _str_MigrationType & ".Exe", _str_MigrationArguments)
+            Dim _processInfo As New ProcessStartInfo(str_USMTFolder & "\" &
+                                                     _str_MigrationType & ".Exe", _str_MigrationArguments)
             _processInfo.WorkingDirectory = str_USMTFolder
             _processInfo.UseShellExecute = True
             _processInfo.WindowStyle = ProcessWindowStyle.Hidden
@@ -143,13 +148,14 @@ Public Class classMigration
             ' Return Cancelled Error Code
             _int_MigrationExitCode = 999
         Catch ex As Exception
-            MsgBox("An error occurred during the Migration:" & vbNewLine & vbNewLine & "Error: " & ex.Message, MsgBoxStyle.Critical, My.Resources.appTitle)
+            MsgBox("An error occurred during the Migration:" & vbNewLine & vbNewLine & "Error: " & ex.Message,
+                   MsgBoxStyle.Critical, My.Resources.appTitle)
         Finally
             sub_DebugMessage("RaiseEvent: MigrationFinished")
             RaiseEvent MigrationFinished()
         End Try
-
     End Sub
+
     Public Sub Spinup()
         ' Reset Variables
         _str_MigrationProgress = Nothing
@@ -176,7 +182,6 @@ Public Class classMigration
         Dim threadStart As New ThreadStart(AddressOf Me.Start)
         _thread = New Thread(threadStart)
         _thread.Start()
-
     End Sub
 
     Public Sub SpinDown()
@@ -200,10 +205,10 @@ Public Class classMigration
         Catch ex As Exception
 
         End Try
-
     End Sub
 
-    Private Sub _sub_MigrationProgressReturn(ByVal sender As Object, ByVal e As FileSystemEventArgs) Handles _fsw_migrationProgressFileWatcher.Changed
+    Private Sub _sub_MigrationProgressReturn(sender As Object, e As FileSystemEventArgs) _
+        Handles _fsw_migrationProgressFileWatcher.Changed
 
         ' If we're currently checking the progress, don't monitor it again
         ' sub_DebugMessage("DEBUG: Checking if progress-monitoring is already running...")
@@ -219,9 +224,11 @@ Public Class classMigration
         ' Read Progress File into the parser
         Try
             ' sub_DebugMessage("DEBUG: Reading Progress File: " & str_MigrationFolder & "\" & str_MigrationLoggingFolder & "\" & _str_MigrationProgressFile)
-            _io_MigrationProgressFileParser = My.Computer.FileSystem.OpenTextFieldParser(str_MigrationFolder & "\" & _
-                        str_MigrationLoggingFolder & "\" & _str_MigrationProgressFile)
-            _io_MigrationProgressFileParser.TextFieldType = Microsoft.VisualBasic.FileIO.FieldType.Delimited
+            _io_MigrationProgressFileParser = My.Computer.FileSystem.OpenTextFieldParser(str_MigrationFolder & "\" &
+                                                                                         str_MigrationLoggingFolder &
+                                                                                         "\" &
+                                                                                         _str_MigrationProgressFile)
+            _io_MigrationProgressFileParser.TextFieldType = FieldType.Delimited
             _io_MigrationProgressFileParser.Delimiters = New String() {","}
             _io_MigrationProgressFileParser.HasFieldsEnclosedInQuotes = True
             _io_MigrationProgressFileParser.TrimWhiteSpace = True
@@ -247,7 +254,9 @@ Public Class classMigration
                 ' sub_DebugMessage("DEBUG: " & Join(_array_MigrationProgressFileCurrentRow, ","))
                 ' If this line number is higher than the last line, process it
 
-                If UBound(_array_MigrationProgressFileCurrentRow) > 3 And _int_MigrationProgressFileCurrentLine > _int_MigrationProgressFileLastLineNumber Then
+                If _
+                    UBound(_array_MigrationProgressFileCurrentRow) > 3 And
+                    _int_MigrationProgressFileCurrentLine > _int_MigrationProgressFileLastLineNumber Then
                     Select Case _array_MigrationProgressFileCurrentRow(3)
                         Case "PHASE"
                             Select Case _array_MigrationProgressFileCurrentRow(4)
@@ -266,37 +275,53 @@ Public Class classMigration
                                     _str_MigrationProgress = My.Resources.migrationPhaseApplying
                             End Select
                         Case "totalSizeInMBToTransfer"
-                            If Not _array_MigrationProgressFileCurrentRow(4) = "" Then _int_MigrationEstDataSize = _array_MigrationProgressFileCurrentRow(4).Replace(".", strLocaleDecimal)
+                            If Not _array_MigrationProgressFileCurrentRow(4) = "" Then _
+                                _int_MigrationEstDataSize = CInt(_array_MigrationProgressFileCurrentRow(4).Replace(".",
+                                                                                                              strLocaleDecimal))
                         Case "totalPercentageCompleted"
-                            If Not _array_MigrationProgressFileCurrentRow(4) = "" Then _int_MigrationPercentComplete = _array_MigrationProgressFileCurrentRow(4).Replace(".", strLocaleDecimal)
+                            If Not _array_MigrationProgressFileCurrentRow(4) = "" Then _
+                                _int_MigrationPercentComplete = CInt(_array_MigrationProgressFileCurrentRow(4).Replace(".",
+                                                                                                                  strLocaleDecimal))
                         Case "totalMinutesRemaining"
-                            If Not _array_MigrationProgressFileCurrentRow(4) = "" Then _int_MigrationEstTimeRemaining = _array_MigrationProgressFileCurrentRow(4).Replace(".", strLocaleDecimal)
+                            If Not _array_MigrationProgressFileCurrentRow(4) = "" Then _
+                                _int_MigrationEstTimeRemaining = CInt(_array_MigrationProgressFileCurrentRow(4).Replace(".",
+                                                                                                                   strLocaleDecimal))
                         Case "detectedUser"
                             If _array_MigrationProgressFileCurrentRow(6) = "Yes" Then
-                                _str_MigrationDebugInfo = My.Resources.migrationDetectedUser & " " & _array_MigrationProgressFileCurrentRow(4)
+                                _str_MigrationDebugInfo = My.Resources.migrationDetectedUser & " " &
+                                                          _array_MigrationProgressFileCurrentRow(4)
                             End If
                         Case "forUser"
                             If _array_MigrationProgressFileCurrentRow(8) = "Yes" Then
-                                _str_MigrationDebugInfo = My.Resources.migrationForUser & " " & _array_MigrationProgressFileCurrentRow(4) & " - " & _array_MigrationProgressFileCurrentRow(6)
+                                _str_MigrationDebugInfo = My.Resources.migrationForUser & " " &
+                                                          _array_MigrationProgressFileCurrentRow(4) & " - " &
+                                                          _array_MigrationProgressFileCurrentRow(6)
                             End If
                         Case "collectingUser"
-                            _str_MigrationDebugInfo = My.Resources.migrationCollectingUser & " " & _array_MigrationProgressFileCurrentRow(4)
+                            _str_MigrationDebugInfo = My.Resources.migrationCollectingUser & " " &
+                                                      _array_MigrationProgressFileCurrentRow(4)
                         Case "errorCode"
-                            Select Case _array_MigrationProgressFileCurrentRow(4)
-                                Case 0
-                                    _str_MigrationDebugInfo = My.Resources.migrationCompleteSuccess & " " & My.Resources.migrationNonFatalErrors & " " & _array_MigrationProgressFileCurrentRow(6)
-                                Case Else
-                                    _str_MigrationDebugInfo = My.Resources.migrationCompleteError & " " & _array_MigrationProgressFileCurrentRow(4)
-                            End Select
+                            If CInt(_array_MigrationProgressFileCurrentRow(4)) = 0 Then
+                                _str_MigrationDebugInfo = My.Resources.migrationCompleteSuccess & " " &
+                                                          My.Resources.migrationNonFatalErrors & " " &
+                                                          _array_MigrationProgressFileCurrentRow(6)
+                                Else 
+                                    _str_MigrationDebugInfo = My.Resources.migrationCompleteError & " " &
+                                                              _array_MigrationProgressFileCurrentRow(4)
+                            End If
                     End Select
                     ' Update the recorded line number
                     _int_MigrationProgressFileLastLineNumber = _int_MigrationProgressFileCurrentLine
                 End If
 
-            Catch ex As Microsoft.VisualBasic.FileIO.MalformedLineException
-                sub_DebugMessage("Line " & _int_MigrationProgressFileCurrentLine & " is malformed and will be skipped: " & Join(_array_MigrationProgressFileCurrentRow, ", ") & " - " & ex.Message)
+            Catch ex As MalformedLineException
+                sub_DebugMessage(
+                    "Line " & _int_MigrationProgressFileCurrentLine & " is malformed and will be skipped: " &
+                    Join(_array_MigrationProgressFileCurrentRow, ", ") & " - " & ex.Message)
             Catch ex As Exception
-                sub_DebugMessage("Error occurred while reading line " & _int_MigrationProgressFileCurrentLine & ": " & Join(_array_MigrationProgressFileCurrentRow, ", ") & " - " & ex.Message)
+                sub_DebugMessage(
+                    "Error occurred while reading line " & _int_MigrationProgressFileCurrentLine & ": " &
+                    Join(_array_MigrationProgressFileCurrentRow, ", ") & " - " & ex.Message)
             Finally
                 _int_MigrationProgressFileCurrentLine = _int_MigrationProgressFileCurrentLine + 1
                 ' Raise event that the progress has changed
@@ -306,6 +331,6 @@ Public Class classMigration
         _io_MigrationProgressFileParser.Close()
         _bln_MigrationProgressCheckInProgress = False
     End Sub
-#End Region
 
+#End Region
 End Class
