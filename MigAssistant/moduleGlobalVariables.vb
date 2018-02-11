@@ -5,36 +5,30 @@ Module moduleGlobalVariables
 
     ' Constants
     Public Const str_MigrationDataStoreFolder As String = "Datastore"
-
     Public Const str_MigrationLoggingFolder As String = "Logging"
     Public Const str_MigrationXMLConfigName As String = "Migration.XML"
 
     ' Locale Settings
     Public strLocaleDecimal As String = Mid(CStr(11 / 10), 2, 1)
-
     Public strLocaleComma As String = Chr(90 - Asc(strLocaleDecimal))
 
     ' Set up encryption type
     Public encryption_SymmetricEncryption As New Encryption.Symmetric(Encryption.Symmetric.Provider.TripleDES)
-
     ' Set encryption key
     Public encryption_DataHash As New Encryption.Data("1kb3n33nb3st")
 
     ' Get OS Information
     Public dbl_OSVersion As Double = Left(My.Computer.Info.OSVersion, 3).Replace(".", strLocaleDecimal)
-
     Public str_OSFullName As String = My.Computer.Info.OSFullName
     Public str_OSArchitecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE")
 
     ' Current Workstation Information
     Public str_EnvDomain As String = System.Environment.UserDomainName
-
     Public str_EnvUserName As String = Replace(My.User.CurrentPrincipal.Identity.Name, System.Environment.UserDomainName & "\", "", , , CompareMethod.Text)
     Public str_EnvComputerName As String = My.Computer.Name
 
     ' Set Up Variables
     Public arraylist_MigrationArguments As New ArrayList
-
     Public arraylist_ScriptsCurrent As New ArrayList
     Public bln_HealthCheck As Boolean = False
     Public bln_HealthCheckStatusOk As Boolean = False
@@ -57,7 +51,6 @@ Module moduleGlobalVariables
 
     ' Get Application Information
     Public str_USMTFolder As String = My.Computer.FileSystem.SpecialDirectories.ProgramFiles & "\USMT301"
-
     Public str_WMAFolder As String = My.Application.Info.DirectoryPath
     Public str_TempFolder As String = System.IO.Path.GetTempPath.TrimEnd("\")
     Public str_LogFile As String = My.Computer.FileSystem.SpecialDirectories.Temp & "\WMA.Log"
@@ -65,7 +58,6 @@ Module moduleGlobalVariables
 
     ' Get Settings from .Exe.Settings file
     Public str_MigrationConfigFile As String = My.Settings.MigrationConfig
-
     Public array_MigrationExclusionsDomain() As String = Split(My.Settings.MigrationExclusionsDomain, ",")
     Public array_MigrationExclusionsLocal() As String = Split(My.Settings.MigrationExclusionsLocal, ",")
     Public bln_MigrationMultiUserMode As Boolean = My.Settings.MigrationMultiUserMode
@@ -100,14 +92,12 @@ Module moduleGlobalVariables
 
     ' Resources
     Public str_bddManifestURL As String = My.Resources.bddManifestURL
-
     Public str_bddManifestFile As String = My.Resources.bddManifestFile
     Public str_USMTGUIDx86 As String = My.Resources.usmtGUIDx86
     Public str_USMTGUIDx64 As String = My.Resources.usmtGUIDx64
 
     ' *** Migration Settings
     Public bln_MigrationSettingsAllUsers As Boolean = False
-
     Public bln_MigrationSettingsLocalAccounts As Boolean = False
     Public bln_MigrationLocationUseOther As Boolean = False
     Public str_MigrationLocationOther As String = Nothing
@@ -174,6 +164,7 @@ Module moduleGlobalVariables
                 Catch ex As Exception
                     Throw New Exception(ex.Message)
                 End Try
+
             Catch ex As Exception
                 MessageBox.Show("ERROR: Unable to create Debug log file: " & ex.Message & ". Debugging switched off", My.Resources.appTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning)
                 bln_SettingsDebugMode = False
@@ -221,5 +212,4 @@ Module moduleGlobalVariables
         func_BytesToMB = Format(dbl_Result, "###,###,##0.00")
 
     End Function
-
 End Module

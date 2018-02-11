@@ -1,4 +1,5 @@
-Imports System.Net.Mail
+Imports Microsoft.VisualBasic
+Imports System.net.Mail
 
 Public Class classEmail
     Private _str_MailServer As String
@@ -16,7 +17,6 @@ Public Class classEmail
             _str_MailServer = value
         End Set
     End Property
-
     Public Property Recipients() As String
         Get
             Return _str_MailRecipients
@@ -25,7 +25,6 @@ Public Class classEmail
             _str_MailRecipients = value
         End Set
     End Property
-
     Public Property From() As String
         Get
             Return _str_MailFrom
@@ -34,7 +33,6 @@ Public Class classEmail
             _str_MailFrom = value
         End Set
     End Property
-
     Public Property Subject() As String
         Get
             Return _str_MailSubject
@@ -43,7 +41,6 @@ Public Class classEmail
             _str_MailSubject = value
         End Set
     End Property
-
     Public Property Message() As String
         Get
             Return _str_MailMessage
@@ -52,7 +49,6 @@ Public Class classEmail
             _str_MailMessage = value
         End Set
     End Property
-
     Public Property Attachments() As String
         Get
             Return _str_MailAttachments
@@ -61,7 +57,6 @@ Public Class classEmail
             _str_MailAttachments = value
         End Set
     End Property
-
     Public Sub Send()
         'This procedure takes string array parameters for multiple recipients and files
         Try

@@ -1,14 +1,18 @@
 Imports System.IO
-Imports System.Xml
+Imports System.Net
+Imports System.Text
+Imports System.Threading
+Imports System.Management
+Imports System.xml
+Imports System.Xml.XPath
+
 
 Public Class form_Migration
 
     ' Set up the USB Event watcher
     Private WithEvents eventwatcher_USBStateChange As ManagementEventWatcher
-
     ' Set up the classes with events
     Private WithEvents class_Migration As classMigration
-
     Private WithEvents class_HealthCheck As classHealthCheck
 
 #Region "Form Events"
@@ -460,9 +464,9 @@ Public Class form_Migration
 
                                 ' Present option to use new drive
                                 sub_DebugMessage("User Dialog...")
-                                Dim msgbox_Result As DialogResult = MsgBox(My.Resources.usbDeviceDescription & " " &
-                                My.Resources.usbDeviceConnectedStartup & " " & My.Resources.usbDeviceUseDrive,
-                                                MsgBoxStyle.YesNo + MsgBoxStyle.SystemModal + MsgBoxStyle.Question,
+                                Dim msgbox_Result As DialogResult = MsgBox(My.Resources.usbDeviceDescription & " " & _
+                                My.Resources.usbDeviceConnectedStartup & " " & My.Resources.usbDeviceUseDrive, _
+                                                MsgBoxStyle.YesNo + MsgBoxStyle.SystemModal + MsgBoxStyle.Question, _
                                                 func_USBGetDriveLetter(obj_Query("Name")) & " - " & obj_Query("Caption"))
                                 Select Case msgbox_Result
                                     ' Set useUSBMigrationLocation to true and set new USB drive location
@@ -477,13 +481,14 @@ Public Class form_Migration
                             End If
                         Case Else
                             ' Display error about drive
-                            sub_DebugMessage("ERROR: " & My.Resources.usbDeviceDescription & " " &
-                                    My.Resources.usbDeviceConnectedStartup & " " & My.Resources.usbDeviceSMARTFail1 &
-                                    vbNewLine & vbNewLine & My.Resources.usbDeviceSMARTFail2 & vbNewLine &
+                            sub_DebugMessage("ERROR: " & My.Resources.usbDeviceDescription & " " & _
+                                    My.Resources.usbDeviceConnectedStartup & " " & My.Resources.usbDeviceSMARTFail1 & _
+                                    vbNewLine & vbNewLine & My.Resources.usbDeviceSMARTFail2 & vbNewLine & _
                                     func_USBGetDriveLetter(obj_Query("Name")) & " - " & obj_Query("Caption"), True)
                     End Select
                 End If
             Next
+
         Catch ex As Exception
             sub_DebugMessage("ERROR: Failed to determine if USB drive was connected. " & ex.Message)
         End Try
@@ -528,9 +533,9 @@ Public Class form_Migration
                                     Case True
                                         ' Present option to use new drive instead
                                         sub_DebugMessage("User Dialog...")
-                                        Dim msgbox_Result As DialogResult = MsgBox(My.Resources.usbDeviceDescriptionAdditional & " " &
-                                                        My.Resources.usbDeviceConnectedEvent & " " & My.Resources.usbDeviceUseDrive,
-                                                        MsgBoxStyle.YesNo + MsgBoxStyle.SystemModal + MsgBoxStyle.Question,
+                                        Dim msgbox_Result As DialogResult = MsgBox(My.Resources.usbDeviceDescriptionAdditional & " " & _
+                                                        My.Resources.usbDeviceConnectedEvent & " " & My.Resources.usbDeviceUseDrive, _
+                                                        MsgBoxStyle.YesNo + MsgBoxStyle.SystemModal + MsgBoxStyle.Question, _
                                                         func_USBGetDriveLetter(obj_Query("Name")) & " - " & obj_Query("Caption"))
                                         Select Case msgbox_Result
                                             ' Set new USB drive location
@@ -543,9 +548,9 @@ Public Class form_Migration
                                         End Select
                                         ' Present option to use drive
                                     Case False
-                                        Dim msgbox_Result As DialogResult = MsgBox(My.Resources.usbDeviceDescription & " " &
-                                                        My.Resources.usbDeviceConnectedEvent & " " & My.Resources.usbDeviceUseDrive,
-                                                        MsgBoxStyle.YesNo + MsgBoxStyle.SystemModal + MsgBoxStyle.Question,
+                                        Dim msgbox_Result As DialogResult = MsgBox(My.Resources.usbDeviceDescription & " " & _
+                                                        My.Resources.usbDeviceConnectedEvent & " " & My.Resources.usbDeviceUseDrive, _
+                                                        MsgBoxStyle.YesNo + MsgBoxStyle.SystemModal + MsgBoxStyle.Question, _
                                                         func_USBGetDriveLetter(obj_Query("Name")) & " - " & obj_Query("Caption"))
                                         Select Case msgbox_Result
                                             ' Set useUSBMigrationLocation to true and set new USB drive location
@@ -557,9 +562,9 @@ Public Class form_Migration
                                 End Select
                             Case Else
                                 ' Display error about drive
-                                sub_DebugMessage("ERROR: " & My.Resources.usbDeviceDescription & " " &
-                                        My.Resources.usbDeviceConnectedEvent & " " & My.Resources.usbDeviceSMARTFail1 &
-                                        vbNewLine & vbNewLine & My.Resources.usbDeviceSMARTFail2 & vbNewLine &
+                                sub_DebugMessage("ERROR: " & My.Resources.usbDeviceDescription & " " & _
+                                        My.Resources.usbDeviceConnectedEvent & " " & My.Resources.usbDeviceSMARTFail1 & _
+                                        vbNewLine & vbNewLine & My.Resources.usbDeviceSMARTFail2 & vbNewLine & _
                                         func_USBGetDriveLetter(obj_Query("Name")) & " - " & obj_Query("Caption"), True)
                         End Select
 
@@ -570,12 +575,13 @@ Public Class form_Migration
                         sub_DebugMessage("USB drive has been removed. USB mode disabled")
                         ' Set usbUSBDrive to false and display message
                         bln_MigrationLocationUseUSB = False
-                        sub_DebugMessage("WARNING: " & My.Resources.usbDeviceDescriptionCurrent & " " &
-                                My.Resources.usbDeviceDisconnectedEvent & " " &
-                                vbNewLine & vbNewLine & My.Resources.usbDeviceSwitchToStandard & vbNewLine &
+                        sub_DebugMessage("WARNING: " & My.Resources.usbDeviceDescriptionCurrent & " " & _
+                                My.Resources.usbDeviceDisconnectedEvent & " " & _
+                                vbNewLine & vbNewLine & My.Resources.usbDeviceSwitchToStandard & vbNewLine & _
                                 obj_Query("Caption"), True)
                     End If
             End Select
+
         Catch ex As Exception
             sub_DebugMessage("ERROR: Failed to determine if USB drive was connected / disconnected. " & ex.Message)
         End Try
@@ -609,6 +615,7 @@ Public Class form_Migration
                     str_Return &= obj_Disk("Name") & ","
                 Next
             Next
+
         Catch ex As Exception
             sub_DebugMessage("ERROR: Failed to determine USB drive letter. " & ex.Message)
             Return Nothing
@@ -642,6 +649,7 @@ Public Class form_Migration
         Try
             sub_DebugMessage("Spinning up Health Check class...")
             class_HealthCheck.Spinup()
+
         Catch ex As Exception
             sub_DebugMessage("ERROR: " & ex.Message, True)
             label_MigrationCurrentPhase.Text = ex.Message
@@ -713,6 +721,7 @@ Public Class form_Migration
                             appShutdown(8)
                         End If
                 End Select
+
             Catch ex As Exception
                 bln_MigrationStatusOk = False
                 label_MigrationCurrentPhase.Text = ex.Message
@@ -875,8 +884,8 @@ Public Class form_Migration
                     Try
                         If Not bln_MigrationOverwriteExistingFolders Then
                             ' Present option to remove existing migration information
-                            Dim msgbox_Result As DialogResult = MsgBox(My.Resources.migrationOverwriteExistingFolder,
-                                            MsgBoxStyle.YesNo + MsgBoxStyle.SystemModal + MsgBoxStyle.Question,
+                            Dim msgbox_Result As DialogResult = MsgBox(My.Resources.migrationOverwriteExistingFolder, _
+                                            MsgBoxStyle.YesNo + MsgBoxStyle.SystemModal + MsgBoxStyle.Question, _
                                             str_EnvComputerName & "_" & str_EnvUserName)
                             Select Case msgbox_Result
                                 Case Windows.Forms.DialogResult.Yes
@@ -886,10 +895,10 @@ Public Class form_Migration
                             My.Computer.FileSystem.DeleteDirectory(Path.Combine(str_MigrationFolder, str_EnvComputerName & "_" & str_EnvUserName), FileIO.DeleteDirectoryOption.DeleteAllContents)
                         End If
                     Catch exPrivilege As System.Security.AccessControl.PrivilegeNotHeldException
-                        sub_DebugMessage("ERROR: " & My.Resources.migrationDeleteExistingError & vbNewLine & vbNewLine &
+                        sub_DebugMessage("ERROR: " & My.Resources.migrationDeleteExistingError & vbNewLine & vbNewLine & _
                                 exPrivilege.Message, True)
                     Catch ex As Exception
-                        sub_DebugMessage("ERROR: " & My.Resources.migrationDeleteExistingError & vbNewLine & vbNewLine &
+                        sub_DebugMessage("ERROR: " & My.Resources.migrationDeleteExistingError & vbNewLine & vbNewLine & _
                                 ex.Message, True)
                     End Try
                 End If
@@ -1009,6 +1018,7 @@ Public Class form_Migration
         ' Transfer the Arguments list to the Migration Class
         class_Migration.Arguments = arraylist_MigrationArguments
 
+
         ' *** Run Pre-Migration Scripts
         sub_DebugMessage("Running Pre-Migration Scripts...")
         If Not func_MigrationSupportScripts("Pre") Then
@@ -1028,6 +1038,7 @@ Public Class form_Migration
         Try
             sub_DebugMessage("Spinning up Migration class...")
             class_Migration.Spinup()
+
         Catch ex As Exception
             sub_DebugMessage(ex.Message, True)
             label_MigrationCurrentPhase.Text = ex.Message
@@ -1053,7 +1064,7 @@ Public Class form_Migration
                 class_Migration.SpinDown()
 
                 sub_DebugMessage("Checking Exit Code: " & class_Migration.ExitCode)
-                ' Check the exit code.
+                ' Check the exit code. 
                 Select Case class_Migration.ExitCode
                     Case 0, 1073741819, "-1073741819"
                         bln_MigrationStatusOk = True
@@ -1066,6 +1077,7 @@ Public Class form_Migration
                     Case Else
                         Throw New Exception("An unknown error occurred. Check the USMT log files for more details")
                 End Select
+
             Catch ex As Exception
                 bln_MigrationStatusOk = False
                 label_MigrationCurrentPhase.Text = ex.Message
@@ -1289,7 +1301,8 @@ Public Class form_Migration
 
                 str_PreviousStatusMessage = str_StatusMessage
 
-            End If
+                End If
+
         Catch ex As Exception
             sub_DebugMessage(ex.Message, True)
             label_MigrationCurrentPhase.Text = ex.Message
@@ -1365,6 +1378,7 @@ Public Class form_Migration
             Else
                 str_MigrationFolder = str_MigrationLocationNetwork
             End If
+
         Catch ex As Exception
 
         End Try
@@ -1494,9 +1508,9 @@ Public Class form_Migration
             Dim process As New Process
             Dim processInfo As New ProcessStartInfo()
             Dim str_TempFileCheck As String = Nothing
-            Dim str_MigrationScriptArguments As String =
-                    "/USER " & str_EnvUserName & " " &
-                    "/COMPUTER " & str_EnvComputerName & " " &
+            Dim str_MigrationScriptArguments As String = _
+                    "/USER " & str_EnvUserName & " " & _
+                    "/COMPUTER " & str_EnvComputerName & " " & _
                     "/MIGFOLDER " & str_MigrationFolder & " "
             str_TempFileCheck = script.Substring(script.Length - 3)
             Select Case str_TempFileCheck.ToUpper

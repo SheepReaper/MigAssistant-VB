@@ -10,7 +10,6 @@ Public Class classMigration
 
     ' Class Declarations
     Private _str_MigrationArguments As String = Nothing
-
     Private _arraylist_MigrationArguments As New ArrayList
     Private _str_MigrationProgress As String = Nothing
     Private _str_MigrationDebugInfo As String = Nothing
@@ -31,7 +30,6 @@ Public Class classMigration
 #End Region
 
 #Region "Properties"
-
     ' Property: Return the argument list for USMT
     Public Property Arguments() As ArrayList
         Get
@@ -41,7 +39,6 @@ Public Class classMigration
             _arraylist_MigrationArguments = value
         End Set
     End Property
-
     ' Property: Return the migration type
     Public Property Type() As String
         Get
@@ -51,69 +48,59 @@ Public Class classMigration
             _str_MigrationType = value
         End Set
     End Property
-
     ' Property: Return whether the migration is in progress
     Public ReadOnly Property InProgress() As Boolean
         Get
             Return _bln_MigrationInProgress
         End Get
     End Property
-
     ' Property: Return the migration current progress
     Public ReadOnly Property Progress()
         Get
             Return _str_MigrationProgress
         End Get
     End Property
-
     ' Property: Return the migration exit code
     Public ReadOnly Property ExitCode()
         Get
             Return _int_MigrationExitCode
         End Get
     End Property
-
     ' Property: Return the migration current debug info
     Public ReadOnly Property DebugInfo()
         Get
             Return _str_MigrationDebugInfo
         End Get
     End Property
-
     ' Property: Return the migration data size
     Public ReadOnly Property EstDataSize()
         Get
             Return _int_MigrationEstDataSize
         End Get
     End Property
-
     ' Property: Return the migration minutes remaining
     Public ReadOnly Property EstTimeRemaining()
         Get
             Return _int_MigrationEstTimeRemaining
         End Get
     End Property
-
     ' Property: Return the migration percent complete
     Public ReadOnly Property PercentComplete()
         Get
             Return _int_MigrationPercentComplete
         End Get
     End Property
-
     ' Property: Return the path to the migration log file
     Public ReadOnly Property LogFile()
         Get
             Return str_MigrationFolder & "\" & str_MigrationLoggingFolder & "\" & _str_MigrationLogFile
         End Get
     End Property
-
 #End Region
 
 #Region "Events"
 
     Public Event ProgressUpdate()
-
     Public Event MigrationFinished()
 
 #End Region
@@ -123,9 +110,9 @@ Public Class classMigration
     Private Sub Start()
         Try
             ' If the Migration Progress File exists, delete it
-            If My.Computer.FileSystem.FileExists(str_MigrationFolder & "\" &
+            If My.Computer.FileSystem.FileExists(str_MigrationFolder & "\" & _
                     str_MigrationLoggingFolder & "\" & _str_MigrationProgressFile) Then
-                My.Computer.FileSystem.DeleteFile(str_MigrationFolder & "\" &
+                My.Computer.FileSystem.DeleteFile(str_MigrationFolder & "\" & _
                         str_MigrationLoggingFolder & "\" & _str_MigrationProgressFile)
             End If
 
@@ -138,7 +125,7 @@ Public Class classMigration
 
             ' Setup and configure the new process
             _process = New Process
-            Dim _processInfo As New ProcessStartInfo(str_USMTFolder & "\" &
+            Dim _processInfo As New ProcessStartInfo(str_USMTFolder & "\" & _
                     _str_MigrationType & ".Exe", _str_MigrationArguments)
             _processInfo.WorkingDirectory = str_USMTFolder
             _processInfo.UseShellExecute = True
@@ -163,7 +150,6 @@ Public Class classMigration
         End Try
 
     End Sub
-
     Public Sub Spinup()
         ' Reset Variables
         _str_MigrationProgress = Nothing
@@ -210,6 +196,7 @@ Public Class classMigration
             End If
             _process.Close()
             ' _thread = Nothing
+
         Catch ex As Exception
 
         End Try
@@ -232,7 +219,7 @@ Public Class classMigration
         ' Read Progress File into the parser
         Try
             ' sub_DebugMessage("DEBUG: Reading Progress File: " & str_MigrationFolder & "\" & str_MigrationLoggingFolder & "\" & _str_MigrationProgressFile)
-            _io_MigrationProgressFileParser = My.Computer.FileSystem.OpenTextFieldParser(str_MigrationFolder & "\" &
+            _io_MigrationProgressFileParser = My.Computer.FileSystem.OpenTextFieldParser(str_MigrationFolder & "\" & _
                         str_MigrationLoggingFolder & "\" & _str_MigrationProgressFile)
             _io_MigrationProgressFileParser.TextFieldType = Microsoft.VisualBasic.FileIO.FieldType.Delimited
             _io_MigrationProgressFileParser.Delimiters = New String() {","}
@@ -305,6 +292,7 @@ Public Class classMigration
                     ' Update the recorded line number
                     _int_MigrationProgressFileLastLineNumber = _int_MigrationProgressFileCurrentLine
                 End If
+
             Catch ex As Microsoft.VisualBasic.FileIO.MalformedLineException
                 sub_DebugMessage("Line " & _int_MigrationProgressFileCurrentLine & " is malformed and will be skipped: " & Join(_array_MigrationProgressFileCurrentRow, ", ") & " - " & ex.Message)
             Catch ex As Exception
@@ -318,7 +306,6 @@ Public Class classMigration
         _io_MigrationProgressFileParser.Close()
         _bln_MigrationProgressCheckInProgress = False
     End Sub
-
 #End Region
 
 End Class
