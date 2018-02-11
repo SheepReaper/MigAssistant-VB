@@ -1,15 +1,15 @@
 Imports System.IO
 Imports System.Xml
 
-Public Class MainForm
+Public Class form_Migration
 
     ' Set up the USB Event watcher
     Private WithEvents eventwatcher_USBStateChange As ManagementEventWatcher
 
     ' Set up the classes with events
-    Private WithEvents class_Migration As Migration
+    Private WithEvents class_Migration As classMigration
 
-    Private WithEvents class_HealthCheck As HealthCheck
+    Private WithEvents class_HealthCheck As classHealthCheck
 
 #Region "Form Events"
 
@@ -205,7 +205,7 @@ Public Class MainForm
         sub_DebugMessage()
         sub_DebugMessage("* Advanced Settings Button Events *")
 
-        AdvancedSettingsForm.Show()
+        formMigrationAdvancedSettings.Show()
         button_Start.Focus()
 
     End Sub
@@ -628,7 +628,7 @@ Public Class MainForm
         sub_DebugMessage("* Start Health Check *")
 
         ' Initialise the Health Check Class
-        class_HealthCheck = New HealthCheck
+        class_HealthCheck = New classHealthCheck
 
         ' Reset Status items
         Dim str_PreviousStatusMessage As String = Nothing
@@ -779,7 +779,7 @@ Public Class MainForm
         bln_MigrationCancelled = False
 
         ' Initialise the Migration Class
-        class_Migration = New Migration
+        class_Migration = New classMigration
 
         ' Disable / Update form controls
         button_AdvancedSettings.Enabled = False
@@ -979,7 +979,7 @@ Public Class MainForm
                     ' Set scanstate arguments to use standard encryption key
                     arraylist_MigrationArguments.Add("/Key:""" & str_MigrationEncryptionDefaultKey & """")
                 Else
-                    CustomEncryptionForm.tbxCustomEncryptionKey1.Text = str_customEncryptionKey
+                    formCustomEncryption.tbxCustomEncryptionKey1.Text = str_customEncryptionKey
                     ' Set scanstate arguments to use custom encryption key (built from standard key, and user specified)
                     arraylist_MigrationArguments.Add("/Key:""" & str_MigrationEncryptionDefaultKey & str_customEncryptionKey & """")
                 End If
@@ -1137,7 +1137,7 @@ Public Class MainForm
                 Else
 
                     Try
-                        Dim email As New Email
+                        Dim email As New classEmail
                         email.Server = str_MailServer
                         email.Recipients = str_MailRecipients
                         email.From = str_MailFrom
@@ -1393,13 +1393,13 @@ Public Class MainForm
                     ' If multiple matches
                 Case Else
                     ' Present option to select the correct datastore
-                    RestoreMultiDatastoreForm.cbxRestoreMultiDatastoreList.Items.Clear()
+                    formRestoreMultiDatastore.cbxRestoreMultiDatastoreList.Items.Clear()
                     For Each folderTmp As String In arraylist_Folders
-                        RestoreMultiDatastoreForm.cbxRestoreMultiDatastoreList.Items.Add(folderTmp)
+                        formRestoreMultiDatastore.cbxRestoreMultiDatastoreList.Items.Add(folderTmp)
                     Next
-                    RestoreMultiDatastoreForm.cbxRestoreMultiDatastoreList.SelectedItem = RestoreMultiDatastoreForm.cbxRestoreMultiDatastoreList.Items(0)
-                    RestoreMultiDatastoreForm.ShowDialog()
-                    str_TempMigrationFolder = RestoreMultiDatastoreForm.cbxRestoreMultiDatastoreList.SelectedItem
+                    formRestoreMultiDatastore.cbxRestoreMultiDatastoreList.SelectedItem = formRestoreMultiDatastore.cbxRestoreMultiDatastoreList.Items(0)
+                    formRestoreMultiDatastore.ShowDialog()
+                    str_TempMigrationFolder = formRestoreMultiDatastore.cbxRestoreMultiDatastoreList.SelectedItem
                     If str_TempMigrationFolder = Nothing Then
                         Throw New Exception(My.Resources.datastoreMultipleFoundNoneSelected)
                     End If
@@ -1427,7 +1427,7 @@ Public Class MainForm
                 If Not bln_MigrationEncryptionDisabled Then
                     bln_MigrationEncryptionCustom = Xml_Node.Item("Options").Attributes.GetNamedItem("EncryptionCustom").Value
                     If bln_MigrationEncryptionCustom Then
-                        CustomEncryptionForm.ShowDialog()
+                        formCustomEncryption.ShowDialog()
                     End If
                 End If
                 Dim int_MigrationDataSize As Integer = Xml_Node.Item("SCANSTATE").Attributes.GetNamedItem("DataSize").Value

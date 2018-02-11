@@ -1,5 +1,3 @@
-Imports MigAssistant.Encryption
-
 Module moduleGlobalVariables
 
     ' P/Invokes
@@ -20,7 +18,7 @@ Module moduleGlobalVariables
     Public encryption_SymmetricEncryption As New Encryption.Symmetric(Encryption.Symmetric.Provider.TripleDES)
 
     ' Set encryption key
-    Public encryption_DataHash As New Data("1kb3n33nb3st")
+    Public encryption_DataHash As New Encryption.Data("1kb3n33nb3st")
 
     ' Get OS Information
     Public dbl_OSVersion As Double = Left(My.Computer.Info.OSVersion, 3).Replace(".", strLocaleDecimal)

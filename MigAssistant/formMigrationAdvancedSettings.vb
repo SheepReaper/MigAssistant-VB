@@ -1,15 +1,13 @@
-Imports System.ComponentModel
+Public Class formMigrationAdvancedSettings
 
-Public Class AdvancedSettingsForm
-
-    Private Sub BtnAdvancedSettingsClose_Click(sender As Object, e As EventArgs) Handles btnAdvancedSettingsClose.Click
+    Private Sub btnAdvancedSettingsClose_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnAdvancedSettingsClose.Click
 
         ' Close Form
-        Close()
+        Me.Close()
 
     End Sub
 
-    Private Sub Form_Closing(sender As Object, e As CancelEventArgs) Handles MyBase.Closing
+    Private Sub form_Closing(ByVal sender As Object, ByVal e As System.ComponentModel.CancelEventArgs) Handles MyBase.Closing
 
         If rbnAdvancedSettingsQuestion4B.Checked Then
             bln_MigrationSettingsLocalAccounts = True
@@ -19,11 +17,11 @@ Public Class AdvancedSettingsForm
 
         ' Stop the form from actually closing, and hide instead
         e.Cancel = True
-        Hide()
+        Me.Hide()
 
     End Sub
 
-    Private Sub FormMigrationAdvancedSettings_Load(sender As Object, e As EventArgs) Handles MyBase.Load, MyBase.VisibleChanged
+    Private Sub formMigrationAdvancedSettings_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load, MyBase.VisibleChanged
         ' If Encryption is disabled, hide on the settings page
         If bln_MigrationEncryptionDisabled Then
             lblAdvancedSettingsQuestion2.Visible = False
@@ -46,11 +44,11 @@ Public Class AdvancedSettingsForm
         End If
     End Sub
 
-    Private Sub RbnAdvancedSettingsQuestion1_CheckedChanged(sender As Object, e As EventArgs) Handles rbnAdvancedSettingsQuestion1B.CheckedChanged, rbnAdvancedSettingsQuestion1A.CheckedChanged
+    Private Sub rbnAdvancedSettingsQuestion1_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles rbnAdvancedSettingsQuestion1B.CheckedChanged, rbnAdvancedSettingsQuestion1A.CheckedChanged
 
         If rbnAdvancedSettingsQuestion1B.Checked Then
             If Not bln_MigrationLocationUseOther Then
-                If fbdAdvancedSettingsDataStore.ShowDialog(Me) = DialogResult.OK Then
+                If fbdAdvancedSettingsDataStore.ShowDialog(Me) = Windows.Forms.DialogResult.OK Then
                     bln_MigrationLocationUseOther = True
                     str_MigrationLocationOther = fbdAdvancedSettingsDataStore.SelectedPath
                 Else
@@ -63,12 +61,12 @@ Public Class AdvancedSettingsForm
 
     End Sub
 
-    Private Sub RbnAdvancedSettingsQuestion2_CheckedChanged(sender As Object, e As EventArgs) Handles rbnAdvancedSettingsQuestion2B.CheckedChanged, rbnAdvancedSettingsQuestion2A.CheckedChanged
+    Private Sub rbnAdvancedSettingsQuestion2_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles rbnAdvancedSettingsQuestion2B.CheckedChanged, rbnAdvancedSettingsQuestion2A.CheckedChanged
 
         If rbnAdvancedSettingsQuestion2B.Checked Then
             If Not bln_MigrationEncryptionCustom Then
                 bln_MigrationEncryptionCustom = True
-                CustomEncryptionForm.ShowDialog()
+                formCustomEncryption.ShowDialog()
             End If
         Else
             bln_MigrationEncryptionCustom = False

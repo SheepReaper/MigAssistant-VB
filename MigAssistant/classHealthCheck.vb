@@ -1,6 +1,6 @@
 Imports System.Threading
 
-Public Class HealthCheck
+Public Class classHealthCheck
 
 #Region "Declarations"
 

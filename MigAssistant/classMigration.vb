@@ -1,7 +1,7 @@
 Imports System.IO
 Imports System.Threading
 
-Public Class Migration
+Public Class classMigration
 
 #Region "Declarations"
 
