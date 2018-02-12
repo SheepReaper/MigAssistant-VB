@@ -13,3 +13,9 @@
 1. Builds without modification to AnyCPU
 1. Same requirements as above to Debug
     1. Follow the Usage instructions regarding installing and copying USMT, but your destination folder is the Debug output folder for the project in Visual Studio.
+
+## Further Reading
+Please review README for more in-depth information including command-line switches.
+
+## Acknowledgements
+Original README by Dan Cunningham.
