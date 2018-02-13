@@ -77,7 +77,7 @@
     </WarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup>
-    <OptionInfer>Off</OptionInfer>
+    <OptionInfer>On</OptionInfer>
   </PropertyGroup>
   <PropertyGroup>
     <OptionStrict>Off</OptionStrict>

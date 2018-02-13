@@ -147,8 +147,8 @@ Public Class classHealthCheck
                 _str_HealthCheckProgress = My.Resources.diskScanStatus3
             End If
             If _str_HealthCheckOutput.Contains("percent complete") Then
-                _int_HealthCheckPercentComplete = _str_HealthCheckOutput.Substring(0, 2).Trim.Replace(".",
-                                                                                                      strLocaleDecimal)
+                _int_HealthCheckPercentComplete = CInt(_str_HealthCheckOutput.Substring(0, 2).Trim.Replace(".",
+                                                                                                      strLocaleDecimal))
             End If
         End If
 

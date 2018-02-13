@@ -29,7 +29,7 @@ Module moduleGlobalVariables
     Public encryption_DataHash As New Data("1kb3n33nb3st")
 
     ' Get OS Information
-    Public dbl_OSVersion As Double = Left(My.Computer.Info.OSVersion, 3).Replace(".", strLocaleDecimal)
+    Public dbl_OSVersion As Double = CDbl(Left(My.Computer.Info.OSVersion, 3).Replace(".", strLocaleDecimal))
     Public str_OSFullName As String = My.Computer.Info.OSFullName
     Public str_OSArchitecture As String = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE")
 

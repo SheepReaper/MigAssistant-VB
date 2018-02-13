@@ -114,7 +114,7 @@ Public Class form_Migration
         sub_DebugMessage("* Form Closing Events *")
 
         'Exit the application
-        appShutdown(My.Resources.exitCodeOk)
+        appShutdown(CInt(My.Resources.exitCodeOk))
     End Sub
 
     ' Tab Control
@@ -257,10 +257,10 @@ Public Class form_Migration
         sub_DebugMessage()
         sub_DebugMessage("* Check for USMT *")
 
-        Dim bln_IsUSMTInstalled As Boolean = True
+        Dim bln_IsUSMTInstalled = True
         Dim str_bddManifestFileFullPath As String = Path.Combine(str_TempFolder, str_bddManifestFile)
         Dim str_bddComponentFileFullPath As String = Path.Combine(str_TempFolder, My.Resources.bddComponentFile)
-        Dim str_USMTSearchFile As String = "ScanState.Exe"
+        Dim str_USMTSearchFile = "ScanState.Exe"
         Dim xml_GUID As String = Nothing
         Dim xml_Architecture As String = Nothing
         Dim xml_InstallCondition As String = Nothing
@@ -330,8 +330,8 @@ Public Class form_Migration
         sub_DebugMessage()
         sub_DebugMessage("* Check for RuleSet Files *")
 
-        Dim bln_RuleSetMissing As Boolean = False
-        Dim bln_RuleSetCopyFailed As Boolean = False
+        Dim bln_RuleSetMissing = False
+        Dim bln_RuleSetCopyFailed = False
 
         ' *** Set up the rules for migration
         For Each ruleset As String In array_MigrationRuleSet
@@ -436,7 +436,7 @@ Public Class form_Migration
         Catch ex As Exception
             sub_DebugMessage(
                 "ERROR: A problem occurred while processing command-line parameters: " & vbNewLine & ex.Message, True)
-            appShutdown(My.Resources.exitCodeCMDLineParamError)
+            appShutdown(CInt(My.Resources.exitCodeCMDLineParamError))
         End Try
     End Sub
 
@@ -453,45 +453,52 @@ Public Class form_Migration
         ' *** Check if a USB disk drive is connected
         Try
             sub_DebugMessage("Checking if USB drive is connected...")
-            Dim wmiQuery As String = "SELECT * FROM Win32_DiskDrive"
+            Dim wmiQuery = "SELECT * FROM Win32_DiskDrive"
             Dim searcher As New ManagementObjectSearcher(wmiQuery)
             For Each obj_Query As ManagementObject In searcher.Get()
                 ' If this is a USB disk, and the size exceeds what is specified in the settings file
-                If CStr(obj_Query("InterfaceType")) = "USB" And ((CULng(obj_Query("Size"))/1048576) >= int_MigrationMinUSBDiskSize) Then
+                If _
+                    CStr(obj_Query("InterfaceType")) = "USB" And
+                    ((CDbl(obj_Query("Size"))/1048576) >= int_MigrationMinUSBDiskSize) Then
                     sub_DebugMessage(
-                        "Drive Found: " & func_USBGetDriveLetter(CType(obj_Query("Name"), String)) & " - " & CStr(obj_Query("Caption")))
+                        "Drive Found: " & func_USBGetDriveLetter(CStr(obj_Query("Name"))) & " - " &
+                        CStr(obj_Query("Caption")))
                     ' Check SMART tolerences
                     sub_DebugMessage("Drive SMART Status: " & CStr(obj_Query("Status")))
                     Select Case CStr(obj_Query("Status"))
                         Case "OK"
                             ' Automatically use the USB drive if the setting is present
                             If bln_MigrationUSBAutoUseIfAvailable Then
-                                sub_DebugMessage("Auto-Use of USB drive: " & func_USBGetDriveLetter(obj_Query("Name")))
+                                sub_DebugMessage(
+                                    "Auto-Use of USB drive: " & func_USBGetDriveLetter(CStr(obj_Query("Name"))))
                                 bln_MigrationLocationUseUSB = True
-                                str_MigrationLocationUSB = Path.GetFullPath(func_USBGetDriveLetter(obj_Query("Name")))
+                                str_MigrationLocationUSB = Path.GetFullPath(func_USBGetDriveLetter(CStr(obj_Query("Name"))))
                             Else
 
                                 ' Present option to use new drive
                                 sub_DebugMessage("User Dialog...")
-                                Dim msgbox_Result As DialogResult = MsgBox(My.Resources.usbDeviceDescription & " " &
-                                                                           My.Resources.usbDeviceConnectedStartup & " " &
-                                                                           My.Resources.usbDeviceUseDrive,
-                                                                           MsgBoxStyle.YesNo + MsgBoxStyle.SystemModal +
-                                                                           MsgBoxStyle.Question,
-                                                                           func_USBGetDriveLetter(obj_Query("Name")) &
-                                                                           " - " & obj_Query("Caption"))
+                                Dim msgbox_Result As DialogResult =
+                                        MessageBox.Show(Me, My.Resources.usbDeviceDescription & " " &
+                                                            My.Resources.
+                                                                usbDeviceConnectedStartup & " " &
+                                                            My.Resources.usbDeviceUseDrive,
+                                                        func_USBGetDriveLetter(CStr(obj_Query("Name"))) &
+                                                        " - " & CStr(obj_Query("Caption")), MessageBoxButtons.YesNo,
+                                                        MessageBoxIcon.Question)
                                 Select Case msgbox_Result
                                     ' Set useUSBMigrationLocation to true and set new USB drive location
                                     Case DialogResult.Yes
                                         bln_MigrationLocationUseUSB = True
                                         str_MigrationLocationUSB =
-                                            Path.GetFullPath(func_USBGetDriveLetter(obj_Query("Name")))
+                                            Path.GetFullPath(func_USBGetDriveLetter(CStr(obj_Query("Name"))))
                                         sub_DebugMessage(
-                                            "User chose to use drive: " & func_USBGetDriveLetter(obj_Query("Name")))
+                                            "User chose to use drive: " &
+                                            func_USBGetDriveLetter(CStr(obj_Query("Name"))))
                                         Exit Sub
                                     Case Else
                                         sub_DebugMessage(
-                                            "User chose not to use drive: " & func_USBGetDriveLetter(obj_Query("Name")))
+                                            "User chose not to use drive: " &
+                                            func_USBGetDriveLetter(CStr(obj_Query("Name"))))
                                 End Select
                             End If
                         Case Else
@@ -511,7 +518,7 @@ Public Class form_Migration
         End Try
 
         ' *** Start watching USB device State Change Events
-        Dim wmiEventQuery As String =
+        Dim wmiEventQuery =
                 "SELECT * FROM __InstanceOperationEvent WITHIN 10 WHERE TargetInstance ISA ""Win32_DiskDrive"""
         eventwatcher_USBStateChange = New ManagementEventWatcher(wmiEventQuery)
         sub_DebugMessage("Starting USB event watcher...")
@@ -553,14 +560,21 @@ Public Class form_Migration
                                     Case True
                                         ' Present option to use new drive instead
                                         sub_DebugMessage("User Dialog...")
-                                        Dim msgbox_Result As DialogResult =
-                                                MsgBox(My.Resources.usbDeviceDescriptionAdditional & " " &
-                                                       My.Resources.usbDeviceConnectedEvent & " " &
-                                                       My.Resources.usbDeviceUseDrive,
-                                                       MsgBoxStyle.YesNo + MsgBoxStyle.SystemModal +
-                                                       MsgBoxStyle.Question,
-                                                       func_USBGetDriveLetter(obj_Query("Name")) & " - " &
-                                                       obj_Query("Caption"))
+                                        Dim msgbox_Result As DialogResult = messagebox.Show(Me,
+                                                                                            My.Resources.
+                                                                                                usbDeviceDescriptionAdditional &
+                                                                                            " " &
+                                                                                            My.Resources.
+                                                                                                usbDeviceConnectedEvent &
+                                                                                            " " &
+                                                                                            My.Resources.
+                                                                                                usbDeviceUseDrive,
+                                                                                            func_USBGetDriveLetter(
+                                                                                                obj_Query("Name")) &
+                                                                                            " - " &
+                                                                                            obj_Query("Caption"),
+                                                                                            MessageBoxButtons.YesNo,
+                                                                                            MessageBoxIcon.Question)
                                         Select Case msgbox_Result
                                             ' Set new USB drive location
                                             Case DialogResult.Yes
@@ -578,13 +592,12 @@ Public Class form_Migration
                                         ' Present option to use drive
                                     Case False
                                         Dim msgbox_Result As DialogResult =
-                                                MsgBox(My.Resources.usbDeviceDescription & " " &
-                                                       My.Resources.usbDeviceConnectedEvent & " " &
-                                                       My.Resources.usbDeviceUseDrive,
-                                                       MsgBoxStyle.YesNo + MsgBoxStyle.SystemModal +
-                                                       MsgBoxStyle.Question,
-                                                       func_USBGetDriveLetter(obj_Query("Name")) & " - " &
-                                                       obj_Query("Caption"))
+                                                MessageBox.Show(Me, My.Resources.usbDeviceDescription & " " &
+                                                                    My.Resources.usbDeviceConnectedEvent & " " &
+                                                                    My.Resources.usbDeviceUseDrive,
+                                                                func_USBGetDriveLetter(obj_Query("Name")) & " - " &
+                                                                obj_Query("Caption"),
+                                                                MessageBoxButtons.YesNo, MessageBoxIcon.Question)
                                         Select Case msgbox_Result
                                             ' Set useUSBMigrationLocation to true and set new USB drive location
                                             Case DialogResult.Yes
@@ -629,7 +642,7 @@ Public Class form_Migration
         Dim objquery_Partition, objquery_Disk As ObjectQuery
         Dim searcher_Partition, searcher_Disk As ManagementObjectSearcher
         Dim obj_Partition, obj_Disk As ManagementObject
-        Dim str_Return As String = ""
+        Dim str_Return = ""
 
         ' WMI queries use the "\" as an escape charcter
         Name = Replace(Name, "\", "\\")
@@ -744,11 +757,12 @@ Public Class form_Migration
 
                         ' See if the user wants to fix the problem or continue
                         sub_DebugMessage("Prompting User for action...")
-                        Dim msgbox_Result As DialogResult = MsgBox(My.Resources.diskScanFixMessage,
-                                                                   MsgBoxStyle.Exclamation + MsgBoxStyle.YesNoCancel,
-                                                                   My.Resources.appTitle)
+                        Dim msgbox_Result As DialogResult = MessageBox.Show(My.Resources.diskScanFixMessage,
+                                                                            My.Resources.appTitle,
+                                                                            MessageBoxButtons.YesNoCancel,
+                                                                            MessageBoxIcon.Exclamation)
                         ' If yes, start CHKDSK
-                        If msgbox_Result = MsgBoxResult.Yes Then
+                        If msgbox_Result = DialogResult.Yes Then
                             sub_DebugMessage("INFO: User chose to fix disk and reboot")
                             Process.Start("CMD", "/C Echo Y | CHKDSK /F /R")
                             Process.Start("Shutdown",
@@ -756,7 +770,7 @@ Public Class form_Migration
                                           ". Restarting Workstation""")
                             appShutdown(1)
                             ' If no, continue with the migration
-                        ElseIf msgbox_Result = MsgBoxResult.No Then
+                        ElseIf msgbox_Result = DialogResult.No Then
                             sub_DebugMessage("WARNING: " & My.Resources.diskScanFixCancelledMessage, True)
                             ' If cancel, close the application
                         Else
@@ -934,10 +948,13 @@ Public Class form_Migration
                     Try
                         If Not bln_MigrationOverwriteExistingFolders Then
                             ' Present option to remove existing migration information
-                            Dim msgbox_Result As DialogResult = MsgBox(My.Resources.migrationOverwriteExistingFolder,
-                                                                       MsgBoxStyle.YesNo + MsgBoxStyle.SystemModal +
-                                                                       MsgBoxStyle.Question,
-                                                                       str_EnvComputerName & "_" & str_EnvUserName)
+                            Dim msgbox_Result As DialogResult = MessageBox.Show(Me,
+                                                                                My.Resources.
+                                                                                   migrationOverwriteExistingFolder,
+                                                                                str_EnvComputerName & "_" &
+                                                                                str_EnvUserName,
+                                                                                MessageBoxButtons.YesNo,
+                                                                                MessageBoxIcon.Question)
                             Select Case msgbox_Result
                                 Case DialogResult.Yes
                                     My.Computer.FileSystem.DeleteDirectory(
@@ -1157,7 +1174,7 @@ Public Class form_Migration
             ' Write WMA XML Log File
             Try
                 sub_DebugMessage("Building XML Log File...")
-                Dim xml_LogFile As XmlTextWriter =
+                Dim xml_LogFile =
                         New XmlTextWriter(
                             Path.Combine(str_MigrationFolder, str_MigrationLoggingFolder) & "\WMA_" & str_MigrationType &
                             ".XML", Nothing)
@@ -1518,7 +1535,7 @@ Public Class form_Migration
         label_DatastoreLocation.Text = str_MigrationFolder
 
         Try
-            Dim xml_Document As XmlDocument = New XmlDocument
+            Dim xml_Document = New XmlDocument
             xml_Document.Load(Path.Combine(str_MigrationFolder, "Logging\WMA_ScanState.XML"))
             Dim xml_Nodes As XmlNodeList = xml_Document.GetElementsByTagName("MigAssistant")
             xml_Document = Nothing
