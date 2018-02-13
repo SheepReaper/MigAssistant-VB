@@ -148,7 +148,7 @@ Public Class classHealthCheck
             End If
             If _str_HealthCheckOutput.Contains("percent complete") Then
                 _int_HealthCheckPercentComplete = CInt(_str_HealthCheckOutput.Substring(0, 2).Trim.Replace(".",
-                                                                                                      strLocaleDecimal))
+                                                                                                           strLocaleDecimal))
             End If
         End If
 

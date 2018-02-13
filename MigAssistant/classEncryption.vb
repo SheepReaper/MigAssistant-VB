@@ -503,7 +503,7 @@ Namespace Encryption
         ''' </summary>
         Public Function Decrypt(encryptedData As Data) As Data
             Dim ms As New MemoryStream(encryptedData.Bytes, 0, encryptedData.Bytes.Length)
-            Dim b() As Byte = New Byte(encryptedData.Bytes.Length - 1) {}
+            Dim b = New Byte(encryptedData.Bytes.Length - 1) {}
 
             ValidateKeyAndIv(False)
             Dim cs As New CryptoStream(ms, _crypto.CreateDecryptor(), CryptoStreamMode.Read)
@@ -1263,7 +1263,7 @@ Namespace Encryption
             If ba Is Nothing OrElse ba.Length = 0 Then
                 Return ""
             End If
-            Const HexFormat As String = "{0:X2}"
+            Const HexFormat = "{0:X2}"
             Dim sb As New StringBuilder
             For Each b As Byte In ba
                 sb.Append(String.Format(HexFormat, b))
@@ -1281,7 +1281,7 @@ Namespace Encryption
             Try
                 Dim l As Integer = Convert.ToInt32(hexEncoded.Length/2)
                 Dim b(l - 1) As Byte
-                For i As Integer = 0 To l - 1
+                For i = 0 To l - 1
                     b(i) = Convert.ToByte(hexEncoded.Substring(i*2, 2), 16)
                 Next
                 Return b
@@ -1334,7 +1334,7 @@ Namespace Encryption
         Friend Shared Function GetConfigString(key As String,
                                                Optional ByVal isRequired As Boolean = True) As String
 
-            Dim s As String = CType(ConfigurationManager.AppSettings.Get(key), String)
+            Dim s = CType(ConfigurationManager.AppSettings.Get(key), String)
             If s = Nothing Then
                 If isRequired Then
                     Throw New ConfigurationErrorsException("key <" & key & "> is missing from .config file")

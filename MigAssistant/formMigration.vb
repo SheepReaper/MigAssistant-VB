@@ -507,7 +507,8 @@ Public Class form_Migration
                                              My.Resources.usbDeviceConnectedStartup & " " &
                                              My.Resources.usbDeviceSMARTFail1 &
                                              vbNewLine & vbNewLine & My.Resources.usbDeviceSMARTFail2 & vbNewLine &
-                                             func_USBGetDriveLetter(obj_Query("Name")) & " - " & obj_Query("Caption"),
+                                             func_USBGetDriveLetter(CStr(obj_Query("Name"))) & " - " &
+                                             CStr(obj_Query("Caption")),
                                              True)
                     End Select
                 End If
@@ -547,13 +548,16 @@ Public Class form_Migration
                 ' If creation event...
                 Case "__InstanceCreationEvent"
                     ' If this is a USB disk, and the size exceeds what is specified in the settings file
-                    If obj_Query("InterfaceType") = "USB" And (obj_Query("Size")/1048576) >= int_MigrationMinUSBDiskSize _
+                    If _
+                        CStr(obj_Query("InterfaceType")) = "USB" And
+                        (CDbl(obj_Query("Size"))/1048576) >= int_MigrationMinUSBDiskSize _
                         Then
                         sub_DebugMessage(
-                            "Drive Found: " & func_USBGetDriveLetter(obj_Query("Name")) & " - " & obj_Query("Caption"))
+                            "Drive Found: " & func_USBGetDriveLetter(CStr(obj_Query("Name"))) & " - " &
+                            CStr(obj_Query("Caption")))
                         ' Check SMART tolerences
-                        sub_DebugMessage("Drive SMART Status: " & obj_Query("Status"))
-                        Select Case obj_Query("Status")
+                        sub_DebugMessage("Drive SMART Status: " & CStr(obj_Query("Status")))
+                        Select Case CStr(obj_Query("Status"))
                             Case "OK"
                                 ' Check if USB migration is already selected (ie, prior USB device selected)
                                 Select Case bln_MigrationLocationUseUSB
@@ -570,24 +574,24 @@ Public Class form_Migration
                                                                                             My.Resources.
                                                                                                 usbDeviceUseDrive,
                                                                                             func_USBGetDriveLetter(
-                                                                                                obj_Query("Name")) &
+                                                                                                CStr(obj_Query("Name"))) &
                                                                                             " - " &
-                                                                                            obj_Query("Caption"),
+                                                                                            CStr(obj_Query("Caption")),
                                                                                             MessageBoxButtons.YesNo,
                                                                                             MessageBoxIcon.Question)
                                         Select Case msgbox_Result
                                             ' Set new USB drive location
                                             Case DialogResult.Yes
                                                 str_MigrationLocationUSB =
-                                                    Path.GetFullPath(func_USBGetDriveLetter(obj_Query("Name")))
+                                                    Path.GetFullPath(func_USBGetDriveLetter(CStr(obj_Query("Name"))))
                                                 sub_DebugMessage(
                                                     "User chose to use drive: " &
-                                                    func_USBGetDriveLetter(obj_Query("Name")))
+                                                    func_USBGetDriveLetter(CStr(obj_Query("Name"))))
                                                 Exit Sub
                                             Case Else
                                                 sub_DebugMessage(
                                                     "User chose not to use drive: " &
-                                                    func_USBGetDriveLetter(obj_Query("Name")))
+                                                    func_USBGetDriveLetter(CStr(obj_Query("Name"))))
                                         End Select
                                         ' Present option to use drive
                                     Case False
@@ -595,15 +599,15 @@ Public Class form_Migration
                                                 MessageBox.Show(Me, My.Resources.usbDeviceDescription & " " &
                                                                     My.Resources.usbDeviceConnectedEvent & " " &
                                                                     My.Resources.usbDeviceUseDrive,
-                                                                func_USBGetDriveLetter(obj_Query("Name")) & " - " &
-                                                                obj_Query("Caption"),
+                                                                func_USBGetDriveLetter(CStr(obj_Query("Name"))) & " - " &
+                                                                CStr(obj_Query("Caption")),
                                                                 MessageBoxButtons.YesNo, MessageBoxIcon.Question)
                                         Select Case msgbox_Result
                                             ' Set useUSBMigrationLocation to true and set new USB drive location
                                             Case DialogResult.Yes
                                                 bln_MigrationLocationUseUSB = True
                                                 str_MigrationLocationUSB =
-                                                    Path.GetFullPath(func_USBGetDriveLetter(obj_Query("Name")))
+                                                    Path.GetFullPath(func_USBGetDriveLetter(CStr(obj_Query("Name"))))
                                                 Exit Sub
                                         End Select
                                 End Select
@@ -613,8 +617,8 @@ Public Class form_Migration
                                                  My.Resources.usbDeviceConnectedEvent & " " &
                                                  My.Resources.usbDeviceSMARTFail1 &
                                                  vbNewLine & vbNewLine & My.Resources.usbDeviceSMARTFail2 & vbNewLine &
-                                                 func_USBGetDriveLetter(obj_Query("Name")) & " - " &
-                                                 obj_Query("Caption"), True)
+                                                 func_USBGetDriveLetter(CStr(obj_Query("Name"))) & " - " &
+                                                 CStr(obj_Query("Caption")), True)
                         End Select
 
                     End If
@@ -627,7 +631,7 @@ Public Class form_Migration
                         sub_DebugMessage("WARNING: " & My.Resources.usbDeviceDescriptionCurrent & " " &
                                          My.Resources.usbDeviceDisconnectedEvent & " " &
                                          vbNewLine & vbNewLine & My.Resources.usbDeviceSwitchToStandard & vbNewLine &
-                                         obj_Query("Caption"), True)
+                                         CStr(obj_Query("Caption")), True)
                     End If
             End Select
 
@@ -662,11 +666,11 @@ Public Class form_Migration
 
                 objquery_Disk =
                     New ObjectQuery(
-                        "ASSOCIATORS OF {Win32_DiskPartition.DeviceID=""" & obj_Partition("DeviceID") &
+                        "ASSOCIATORS OF {Win32_DiskPartition.DeviceID=""" & CStr(obj_Partition("DeviceID")) &
                         """} WHERE AssocClass = Win32_LogicalDiskToPartition")
                 searcher_Disk = New ManagementObjectSearcher(objquery_Disk)
                 For Each obj_Disk In searcher_Disk.Get()
-                    str_Return &= obj_Disk("Name") & ","
+                    str_Return &= CStr(obj_Disk("Name")) & ","
                 Next
             Next
 
@@ -812,7 +816,9 @@ Public Class form_Migration
 
             ' Get the current status
             If Not class_HealthCheck.Progress = Nothing Then
-                If Not class_HealthCheck.PercentComplete = Nothing Or class_HealthCheck.PercentComplete = Nothing = 0 _
+                If _
+                    ((Not (class_HealthCheck.PercentComplete = Nothing)) Or
+                     (CInt((class_HealthCheck.PercentComplete = Nothing)) = 0)) _
                     Then
                     str_StatusMessage = class_HealthCheck.Progress & " (" & class_HealthCheck.PercentComplete &
                                         My.Resources.diskScanPercent & ")"
@@ -1098,7 +1104,7 @@ Public Class form_Migration
             label_MigrationCurrentPhase.ForeColor = Color.Red
             label_MigrationCurrentPhase.Text = My.Resources.migrationPreMigrationScriptFail
             If bln_AppProgressOnlyMode Then
-                appShutdown(My.Resources.exitCodePreMigrationScriptFail)
+                appShutdown(CInt(My.Resources.exitCodePreMigrationScriptFail))
             End If
             Exit Sub
         End If
@@ -1138,7 +1144,7 @@ Public Class form_Migration
                 sub_DebugMessage("Checking Exit Code: " & class_Migration.ExitCode)
                 ' Check the exit code. 
                 Select Case class_Migration.ExitCode
-                    Case 0, 1073741819, "-1073741819"
+                    Case 0, 1073741819, - 1073741819
                         bln_MigrationStatusOk = True
                         ' Check if an abort has occurred and end the migration
                     Case 12
@@ -1165,7 +1171,7 @@ Public Class form_Migration
                     label_MigrationCurrentPhase.ForeColor = Color.Red
                     label_MigrationCurrentPhase.Text = My.Resources.migrationPostMigrationScriptFail
                     If bln_AppProgressOnlyMode Then
-                        appShutdown(My.Resources.exitCodePostMigrationScriptFail)
+                        appShutdown(CInt(My.Resources.exitCodePostMigrationScriptFail))
                     End If
                     Exit Sub
                 End If
@@ -1189,27 +1195,27 @@ Public Class form_Migration
                 xml_LogFile.WriteStartElement("Options")
                 Select Case str_MigrationType.ToUpper
                     Case "SCANSTATE"
-                        xml_LogFile.WriteAttributeString("HealthCheck", bln_HealthCheck)
+                        xml_LogFile.WriteAttributeString("HealthCheck", CStr(bln_HealthCheck))
                         If bln_HealthCheck Then
-                            xml_LogFile.WriteAttributeString("HealthCheckStatusOk", bln_HealthCheckStatusOk)
+                            xml_LogFile.WriteAttributeString("HealthCheckStatusOk", CStr(bln_HealthCheckStatusOk))
                         End If
-                        xml_LogFile.WriteAttributeString("AllUsers", bln_MigrationSettingsAllUsers)
-                        xml_LogFile.WriteAttributeString("CompressionDisabled", bln_MigrationCompressionDisabled)
+                        xml_LogFile.WriteAttributeString("AllUsers", CStr(bln_MigrationSettingsAllUsers))
+                        xml_LogFile.WriteAttributeString("CompressionDisabled", CStr(bln_MigrationCompressionDisabled))
                 End Select
-                xml_LogFile.WriteAttributeString("EncryptionDisabled", bln_MigrationEncryptionDisabled)
+                xml_LogFile.WriteAttributeString("EncryptionDisabled", CStr(bln_MigrationEncryptionDisabled))
                 If Not bln_MigrationEncryptionDisabled Then
-                    xml_LogFile.WriteAttributeString("EncryptionCustom", bln_MigrationEncryptionCustom)
+                    xml_LogFile.WriteAttributeString("EncryptionCustom", CStr(bln_MigrationEncryptionCustom))
                 End If
                 xml_LogFile.WriteEndElement()
                 xml_LogFile.WriteStartElement(str_MigrationType)
                 Select Case str_MigrationType.ToUpper
                     Case "SCANSTATE"
-                        xml_LogFile.WriteAttributeString("DataSize", class_Migration.EstDataSize)
+                        xml_LogFile.WriteAttributeString("DataSize", CStr(class_Migration.EstDataSize))
                 End Select
-                xml_LogFile.WriteAttributeString("TimeStart", dtm_StartTime)
-                xml_LogFile.WriteAttributeString("TimeEnd", DateTime.Now)
-                xml_LogFile.WriteAttributeString("StatusOk", bln_MigrationStatusOk)
-                xml_LogFile.WriteAttributeString("ExitCode", class_Migration.ExitCode)
+                xml_LogFile.WriteAttributeString("TimeStart", dtm_StartTime.ToString())
+                xml_LogFile.WriteAttributeString("TimeEnd", DateTime.Now.ToString())
+                xml_LogFile.WriteAttributeString("StatusOk", bln_MigrationStatusOk.ToString())
+                xml_LogFile.WriteAttributeString("ExitCode", class_Migration.ExitCode.ToString())
                 xml_LogFile.WriteEndElement()
                 xml_LogFile.Close()
             Catch ex As Exception
@@ -1297,14 +1303,14 @@ Public Class form_Migration
                 label_MigrationCurrentPhase.ForeColor = Color.Green
                 label_MigrationCurrentPhase.Text = My.Resources.migrationSuccessStatus
                 If bln_AppProgressOnlyMode Then
-                    appShutdown(My.Resources.exitCodeOk)
+                    appShutdown(CInt(My.Resources.exitCodeOk))
                 End If
             Else
                 label_MigrationCurrentPhase.ForeColor = Color.Red
                 label_MigrationCurrentPhase.Text = My.Resources.migrationFailedStatus
                 sub_DebugMessage(My.Resources.migrationFailedMessage)
                 If bln_AppProgressOnlyMode Then
-                    appShutdown(My.Resources.exitCodeMigrationFailed)
+                    appShutdown(CInt(My.Resources.exitCodeMigrationFailed))
                 End If
             End If
 
@@ -1496,7 +1502,7 @@ Public Class form_Migration
             For Each str_FolderSearch As String In col_MigrationFolders
                 'folder = Replace(folder, str_MigrationFolder & "\", "")
                 str_FolderSearch = Replace(str_FolderSearch, str_MigrationFolder & "\", "", 1, - 1, CompareMethod.Text)
-                If InStr(str_FolderSearch, str_EnvUserName, CompareMethod.Text) Then
+                If CBool(InStr(str_FolderSearch, str_EnvUserName, CompareMethod.Text)) Then
                     arraylist_Folders.Add(str_FolderSearch)
                     sub_DebugMessage("Match Found: " & str_FolderSearch)
                 End If
@@ -1507,7 +1513,7 @@ Public Class form_Migration
                     Throw New Exception(My.Resources.datastoreNotFound)
                     ' If one match
                 Case 1
-                    str_TempMigrationFolder = arraylist_Folders(0)
+                    str_TempMigrationFolder = arraylist_Folders(0).ToString()
                     ' If multiple matches
                 Case Else
                     ' Present option to select the correct datastore
@@ -1518,7 +1524,8 @@ Public Class form_Migration
                     formRestoreMultiDatastore.cbxRestoreMultiDatastoreList.SelectedItem =
                         formRestoreMultiDatastore.cbxRestoreMultiDatastoreList.Items(0)
                     formRestoreMultiDatastore.ShowDialog()
-                    str_TempMigrationFolder = formRestoreMultiDatastore.cbxRestoreMultiDatastoreList.SelectedItem
+                    str_TempMigrationFolder =
+                        formRestoreMultiDatastore.cbxRestoreMultiDatastoreList.SelectedItem.ToString()
                     If str_TempMigrationFolder = Nothing Then
                         Throw New Exception(My.Resources.datastoreMultipleFoundNoneSelected)
                     End If
@@ -1540,20 +1547,20 @@ Public Class form_Migration
             Dim xml_Nodes As XmlNodeList = xml_Document.GetElementsByTagName("MigAssistant")
             xml_Document = Nothing
             For Each Xml_Node As XmlNode In xml_Nodes
-                bln_MigrationSettingsAllUsers = Xml_Node.Item("Options").Attributes.GetNamedItem("AllUsers").Value
+                bln_MigrationSettingsAllUsers = CBool(Xml_Node.Item("Options").Attributes.GetNamedItem("AllUsers").Value)
                 bln_MigrationCompressionDisabled =
-                    Xml_Node.Item("Options").Attributes.GetNamedItem("CompressionDisabled").Value
+                    CBool(Xml_Node.Item("Options").Attributes.GetNamedItem("CompressionDisabled").Value)
                 bln_MigrationEncryptionDisabled =
-                    Xml_Node.Item("Options").Attributes.GetNamedItem("EncryptionDisabled").Value
+                    CBool(Xml_Node.Item("Options").Attributes.GetNamedItem("EncryptionDisabled").Value)
                 If Not bln_MigrationEncryptionDisabled Then
                     bln_MigrationEncryptionCustom =
-                        Xml_Node.Item("Options").Attributes.GetNamedItem("EncryptionCustom").Value
+                        CBool(Xml_Node.Item("Options").Attributes.GetNamedItem("EncryptionCustom").Value)
                     If bln_MigrationEncryptionCustom Then
                         formCustomEncryption.ShowDialog()
                     End If
                 End If
-                Dim int_MigrationDataSize As Integer =
-                        Xml_Node.Item("SCANSTATE").Attributes.GetNamedItem("DataSize").Value
+                Dim int_MigrationDataSize =
+                        CInt(Xml_Node.Item("SCANSTATE").Attributes.GetNamedItem("DataSize").Value)
                 If str_PrimaryDataDrive = Nothing Then str_PrimaryDataDrive = "C:"
                 If int_MigrationDataSize > func_GetFreeSpace(str_PrimaryDataDrive) Then
                     Throw New Exception("There is not enough free space on this drive to perform the migration")

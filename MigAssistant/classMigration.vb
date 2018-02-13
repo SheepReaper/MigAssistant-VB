@@ -219,7 +219,7 @@ Public Class classMigration
 
         ' Set up initial values
         Dim _array_MigrationProgressFileCurrentRow As String() = Nothing
-        Dim _int_MigrationProgressFileCurrentLine As Integer = 0
+        Dim _int_MigrationProgressFileCurrentLine = 0
 
         ' Read Progress File into the parser
         Try
@@ -277,15 +277,17 @@ Public Class classMigration
                         Case "totalSizeInMBToTransfer"
                             If Not _array_MigrationProgressFileCurrentRow(4) = "" Then _
                                 _int_MigrationEstDataSize = CInt(_array_MigrationProgressFileCurrentRow(4).Replace(".",
-                                                                                                              strLocaleDecimal))
+                                                                                                                   strLocaleDecimal))
                         Case "totalPercentageCompleted"
                             If Not _array_MigrationProgressFileCurrentRow(4) = "" Then _
-                                _int_MigrationPercentComplete = CInt(_array_MigrationProgressFileCurrentRow(4).Replace(".",
-                                                                                                                  strLocaleDecimal))
+                                _int_MigrationPercentComplete =
+                                    CInt(_array_MigrationProgressFileCurrentRow(4).Replace(".",
+                                                                                           strLocaleDecimal))
                         Case "totalMinutesRemaining"
                             If Not _array_MigrationProgressFileCurrentRow(4) = "" Then _
-                                _int_MigrationEstTimeRemaining = CInt(_array_MigrationProgressFileCurrentRow(4).Replace(".",
-                                                                                                                   strLocaleDecimal))
+                                _int_MigrationEstTimeRemaining =
+                                    CInt(_array_MigrationProgressFileCurrentRow(4).Replace(".",
+                                                                                           strLocaleDecimal))
                         Case "detectedUser"
                             If _array_MigrationProgressFileCurrentRow(6) = "Yes" Then
                                 _str_MigrationDebugInfo = My.Resources.migrationDetectedUser & " " &
@@ -305,9 +307,9 @@ Public Class classMigration
                                 _str_MigrationDebugInfo = My.Resources.migrationCompleteSuccess & " " &
                                                           My.Resources.migrationNonFatalErrors & " " &
                                                           _array_MigrationProgressFileCurrentRow(6)
-                                Else 
-                                    _str_MigrationDebugInfo = My.Resources.migrationCompleteError & " " &
-                                                              _array_MigrationProgressFileCurrentRow(4)
+                            Else
+                                _str_MigrationDebugInfo = My.Resources.migrationCompleteError & " " &
+                                                          _array_MigrationProgressFileCurrentRow(4)
                             End If
                     End Select
                     ' Update the recorded line number

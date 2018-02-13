@@ -67,7 +67,7 @@ Module moduleGlobalVariables
     ' Get Application Information
     Public str_USMTFolder As String = My.Computer.FileSystem.SpecialDirectories.ProgramFiles & "\USMT301"
     Public str_WMAFolder As String = My.Application.Info.DirectoryPath
-    Public str_TempFolder As String = Path.GetTempPath.TrimEnd("\")
+    Public str_TempFolder As String = Path.GetTempPath.TrimEnd("\"(0))
     Public str_LogFile As String = My.Computer.FileSystem.SpecialDirectories.Temp & "\WMA.Log"
     Public str_WMAConfigNetworkCheck As String = "\\ServerName\MigrationShare"
 
@@ -119,7 +119,7 @@ Module moduleGlobalVariables
     Public bln_MigrationLocationUseUSB As Boolean = False
     Public str_MigrationLocationUSB As String = Nothing
     Public bln_MigrationEncryptionCustom As Boolean = False
-    Public str_customEncryptionKey As String = 0
+    Public str_customEncryptionKey As String = "0"
     Public bln_migrationMaxOverride As Boolean = False
     Public bln_migrationFolderOverride As Boolean = False
 
@@ -129,14 +129,13 @@ Module moduleGlobalVariables
 
         If bln_DisplayError = True Then
             If str_DebugMessage.Contains("INFO:") Then
-                MsgBox(str_DebugMessage, MsgBoxStyle.Information + MsgBoxStyle.OkOnly + MsgBoxStyle.MsgBoxSetForeground,
-                       My.Resources.appTitle)
+                MessageBox.Show(str_DebugMessage,
+                                My.Resources.appTitle, MessageBoxButtons.OK, MessageBoxIcon.Information)
             ElseIf str_DebugMessage.Contains("WARNING:") Then
-                MsgBox(str_DebugMessage, MsgBoxStyle.Exclamation + MsgBoxStyle.OkOnly + MsgBoxStyle.MsgBoxSetForeground,
-                       My.Resources.appTitle)
+                MessageBox.Show(str_DebugMessage, My.Resources.appTitle, MessageBoxButtons.OK,
+                                MessageBoxIcon.Exclamation)
             ElseIf str_DebugMessage.Contains("ERROR:") Then
-                MsgBox(str_DebugMessage, MsgBoxStyle.Critical + MsgBoxStyle.OkOnly + MsgBoxStyle.MsgBoxSetForeground,
-                       My.Resources.appTitle)
+                MessageBox.Show(str_DebugMessage, My.Resources.appTitle, MessageBoxButtons.OK, MessageBoxIcon.Error)
             End If
         End If
 
@@ -227,6 +226,6 @@ Module moduleGlobalVariables
 
         Dim dbl_Result As Double
         dbl_Result = (lng_Bytes/1024)/1024
-        func_BytesToMB = Format(dbl_Result, "###,###,##0.00")
+        func_BytesToMB = CLng(Format(dbl_Result, "###,###,##0.00"))
     End Function
 End Module
