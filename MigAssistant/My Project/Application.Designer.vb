@@ -32,7 +32,7 @@ Namespace My
         
         <Global.System.Diagnostics.DebuggerStepThroughAttribute()>  _
         Protected Overrides Sub OnCreateMainForm()
-            Me.MainForm = Global.MigAssistant.form_Migration
+            Me.MainForm = Global.MigAssistant.FormMigration
         End Sub
     End Class
 End Namespace

@@ -1,6 +1,6 @@
 Imports System.ComponentModel
 
-Public Class formCustomEncryption
+Public Class FormCustomEncryption
     Private Sub btnAdvancedSettingsClose_Click(sender As Object, e As EventArgs) Handles btnCustomEncryptionClose.Click
 
         Me.Close()
@@ -8,12 +8,12 @@ Public Class formCustomEncryption
 
     Public Sub form_Closing(sender As Object, e As CancelEventArgs) Handles MyBase.Closing
 
-        Select Case str_MigrationType
+        Select Case StrMigrationType
             Case "SCANSTATE"
-                If Not formMigrationAdvancedSettings.rbnAdvancedSettingsQuestion2A.Checked Then
+                If Not FormMigrationAdvancedSettings.rbnAdvancedSettingsQuestion2A.Checked Then
                     If tbxCustomEncryptionKey1.Text.Length = 0 And tbxCustomEncryptionKey2.Text.Length = 0 Then
                         MsgBox(My.Resources.encryptionNoKeySpecified, MsgBoxStyle.Information, My.Resources.appTitle)
-                        formMigrationAdvancedSettings.rbnAdvancedSettingsQuestion2A.Checked = True
+                        FormMigrationAdvancedSettings.rbnAdvancedSettingsQuestion2A.Checked = True
                     ElseIf tbxCustomEncryptionKey1.Text <> tbxCustomEncryptionKey2.Text Then
                         MsgBox(My.Resources.encryptionKeysDontMatch, MsgBoxStyle.Exclamation, My.Resources.appTitle)
                         tbxCustomEncryptionKey1.Text = Nothing
@@ -22,7 +22,7 @@ Public Class formCustomEncryption
                         e.Cancel = True
                         Exit Sub
                     End If
-                    str_customEncryptionKey = tbxCustomEncryptionKey1.Text
+                    StrCustomEncryptionKey = tbxCustomEncryptionKey1.Text
 
                     ' Stop the form from actually closing, and hide instead
                     e.Cancel = True
@@ -40,7 +40,7 @@ Public Class formCustomEncryption
                     e.Cancel = True
                     Exit Sub
                 End If
-                str_customEncryptionKey = tbxCustomEncryptionKey1.Text
+                StrCustomEncryptionKey = tbxCustomEncryptionKey1.Text
 
                 ' Stop the form from actually closing, and hide instead
                 e.Cancel = True

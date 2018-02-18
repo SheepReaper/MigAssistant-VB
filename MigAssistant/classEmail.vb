@@ -1,105 +1,119 @@
 Imports System.Net.Mail
 Imports System.Text
 
-Public Class classEmail
-    Private _str_MailServer As String
-    Private _str_MailRecipients As String
-    Private _str_MailFrom As String
-    Private _str_MailSubject As String
-    Private _str_MailMessage As String
-    Private _str_MailAttachments As String
+Public Class ClassEmail
 
-    Public Property Server As String
+#Region "Fields"
+
+    Private _strMailAttachments As String
+    Private _strMailFrom As String
+    Private _strMailMessage As String
+    Private _strMailRecipients As String
+    Private _strMailServer As String
+    Private _strMailSubject As String
+
+#End Region
+
+#Region "Properties"
+
+    Public Property Attachments As String
         Get
-            Return _str_MailServer
+            Return _strMailAttachments
         End Get
         Set
-            _str_MailServer = value
-        End Set
-    End Property
-
-    Public Property Recipients As String
-        Get
-            Return _str_MailRecipients
-        End Get
-        Set
-            _str_MailRecipients = value
+            _strMailAttachments = value
         End Set
     End Property
 
     Public Property From As String
         Get
-            Return _str_MailFrom
+            Return _strMailFrom
         End Get
         Set
-            _str_MailFrom = value
-        End Set
-    End Property
-
-    Public Property Subject As String
-        Get
-            Return _str_MailSubject
-        End Get
-        Set
-            _str_MailSubject = value
+            _strMailFrom = value
         End Set
     End Property
 
     Public Property Message As String
         Get
-            Return _str_MailMessage
+            Return _strMailMessage
         End Get
         Set
-            _str_MailMessage = value
+            _strMailMessage = value
         End Set
     End Property
 
-    Public Property Attachments As String
+    Public Property Recipients As String
         Get
-            Return _str_MailAttachments
+            Return _strMailRecipients
         End Get
         Set
-            _str_MailAttachments = value
+            _strMailRecipients = value
         End Set
     End Property
+
+    Public Property Server As String
+        Get
+            Return _strMailServer
+        End Get
+        Set
+            _strMailServer = value
+        End Set
+    End Property
+
+    Public Property Subject As String
+        Get
+            Return _strMailSubject
+        End Get
+        Set
+            _strMailSubject = value
+        End Set
+    End Property
+
+#End Region
+
+#Region "Methods"
 
     Public Sub Send()
         'This procedure takes string array parameters for multiple recipients and files
         Try
             'For each to address create a mail message
-            Dim Message As New MailMessage
-            Message.BodyEncoding = Encoding.Default
-            Message.Subject = _str_MailSubject.Trim()
-            Message.Body = _str_MailMessage.Trim() & vbCrLf
-            Message.From = New MailAddress(_str_MailFrom.Trim())
-            Message.Priority = MailPriority.Normal
-            Message.IsBodyHtml = True
+            Dim mailMessage = New MailMessage With {
+                    .BodyEncoding = Encoding.Default,
+                    .Subject = _strMailSubject.Trim(),
+                    .Body = _strMailMessage.Trim() & vbCrLf,
+                    .From = New MailAddress(_strMailFrom.Trim()),
+                    .Priority = MailPriority.Normal,
+                    .IsBodyHtml = True
+                    }
 
-            For Each recipient As String In Split(_str_MailRecipients, ",")
-                Message.To.Add(New MailAddress(recipient.Trim()))
+            For Each recipient As String In Split(_strMailRecipients, ",")
+                mailMessage.To.Add(New MailAddress(recipient.Trim()))
             Next
 
             'attach each file attachment
-            For Each attachment As String In Split(_str_MailAttachments, ",")
+            For Each attachment As String In Split(_strMailAttachments, ",")
                 If Not attachment = "" Or Nothing Then
-                    Dim MsgAttach As New Attachment(attachment)
-                    Message.Attachments.Add(MsgAttach)
+                    Dim msgAttach As New Attachment(attachment)
+                    mailMessage.Attachments.Add(MsgAttach)
                 End If
             Next
 
             'Smtpclient to send the mail message
-            Dim SmtpMail As New SmtpClient
-            SmtpMail.Host = _str_MailServer
-            SmtpMail.Send(Message)
+            Dim smtpMail As New SmtpClient
+            SmtpMail.Host = _strMailServer
+            SmtpMail.Send(mailMessage)
             'Message Successful
-        Catch exSMTPFailedRecipients As SmtpFailedRecipientsException
+        Catch exSmtpFailedRecipients As SmtpFailedRecipientsException
             Throw New Exception(exSMTPFailedRecipients.Message)
-        Catch exSMTPFailedRecipient As SmtpFailedRecipientException
+        Catch exSmtpFailedRecipient As SmtpFailedRecipientException
             Throw New Exception(exSMTPFailedRecipient.Message)
-        Catch exSMTP As SmtpException
+        Catch exSmtp As SmtpException
             Throw New Exception(exSMTP.Message)
         Catch ex As Exception
             Throw New Exception(ex.Message)
         End Try
     End Sub
+
+#End Region
 End Class
