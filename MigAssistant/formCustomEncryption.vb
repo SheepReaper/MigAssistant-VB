@@ -3,7 +3,7 @@ Imports System.ComponentModel
 Public Class FormCustomEncryption
     Private Sub btnAdvancedSettingsClose_Click(sender As Object, e As EventArgs) Handles btnCustomEncryptionClose.Click
 
-        Me.Close()
+        Close()
     End Sub
 
     Public Sub form_Closing(sender As Object, e As CancelEventArgs) Handles MyBase.Closing
@@ -26,7 +26,7 @@ Public Class FormCustomEncryption
 
                     ' Stop the form from actually closing, and hide instead
                     e.Cancel = True
-                    Me.Hide()
+                    Hide()
                 End If
             Case "LOADSTATE"
                 If tbxCustomEncryptionKey1.Text.Length = 0 And tbxCustomEncryptionKey2.Text.Length = 0 Then
@@ -44,7 +44,7 @@ Public Class FormCustomEncryption
 
                 ' Stop the form from actually closing, and hide instead
                 e.Cancel = True
-                Me.Hide()
+                Hide()
 
         End Select
     End Sub

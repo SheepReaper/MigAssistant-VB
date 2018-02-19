@@ -12,6 +12,7 @@ Public Class ClassHealthCheck
     Private _strHealthCheckOutput As String = Nothing
     Private _strHealthCheckProgress As String = Nothing
     Private _thread As Thread
+    Private _disposed As Boolean = False
 
 #End Region
 
@@ -114,7 +115,7 @@ Public Class ClassHealthCheck
         End If
 
         ' Raise event that the progress has changed
-        If _blnHealthCheckInProgress Then RaiseEvent ProgressUpdate(Me,Nothing)
+        If _blnHealthCheckInProgress Then RaiseEvent ProgressUpdate(Me, Nothing)
     End Sub
 
     Private Sub Start()
@@ -154,14 +155,25 @@ Public Class ClassHealthCheck
             Sub_DebugMessage($"ERROR: Heath Check Failed: {ex.Message}", True)
         Finally
             Sub_DebugMessage("RaiseEvent: HealthCheckFinished")
-            RaiseEvent HealthCheckFinished(Me,Nothing)
+            RaiseEvent HealthCheckFinished(Me, Nothing)
         End Try
     End Sub
-    
+
 
 #End Region
 
-    Public Overridable Sub Dispose() Implements IDisposable.Dispose
-        _process?.Dispose()
+    Public Sub Dispose() Implements IDisposable.Dispose
+        Dispose(True)
+        GC.SuppressFinalize(Me)
+    End Sub
+
+    Protected Overridable Sub Dispose(disposing As Boolean)
+        If (_disposed) Then Return
+
+        If (disposing) Then
+            _process.Dispose()
+        End If
+
+        _disposed = True
     End Sub
 End Class

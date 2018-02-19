@@ -14,10 +14,10 @@ Namespace Encryption
             If ba Is Nothing OrElse ba.Length = 0 Then
                 Return ""
             End If
-            Const HexFormat = "{0:X2}"
+            Const hexFormat = "{0:X2}"
             Dim sb As New StringBuilder
             For Each b As Byte In ba
-                sb.Append(String.Format(HexFormat, b))
+                sb.Append(String.Format(hexFormat, b))
             Next
             Return sb.ToString
         End Function
@@ -85,7 +85,7 @@ Namespace Encryption
         Friend Shared Function GetConfigString(key As String,
                                                Optional ByVal isRequired As Boolean = True) As String
 
-            Dim s = CType(ConfigurationManager.AppSettings.Get(key), String)
+            Dim s = ConfigurationManager.AppSettings.Get(key)
             If s = Nothing Then
                 If isRequired Then
                     Throw New ConfigurationErrorsException("key <" & key & "> is missing from .config file")

@@ -1,7 +1,7 @@
 Public Class FormRestoreMultiDatastore
-    Private Sub btnRestoreMultiDatastoreContinue_Click(sender As Object, e As EventArgs) _
+    Private Sub BtnRestoreMultiDatastoreContinue_Click(sender As Object, e As EventArgs) _
         Handles btnRestoreMultiDatastoreContinue.Click
 
-        Me.Close()
+        Close()
     End Sub
 End Class

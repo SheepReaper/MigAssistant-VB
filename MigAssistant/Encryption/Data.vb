@@ -9,9 +9,9 @@ Namespace Encryption
     ''' </summary>
     Public Class Data
         Private _b As Byte()
-        Private _MaxBytes As Integer = 0
-        Private _MinBytes As Integer = 0
-        Private _StepBytes As Integer = 0
+        Private _maxBytes As Integer = 0
+        Private _minBytes As Integer = 0
+        Private _stepBytes As Integer = 0
 
         ''' <summary>
         '''     Determines the default text encoding across ALL Data instances
@@ -41,7 +41,7 @@ Namespace Encryption
         '''     will be converted to byte array using default encoding
         ''' </summary>
         Public Sub New(s As String)
-            Me.Text = s
+            Text = s
         End Sub
 
         ''' <summary>
@@ -50,7 +50,7 @@ Namespace Encryption
         ''' </summary>
         Public Sub New(s As String, encoding As Encoding)
             Me.Encoding = encoding
-            Me.Text = s
+            Text = s
         End Sub
 
         ''' <summary>
@@ -73,10 +73,10 @@ Namespace Encryption
         ''' </summary>
         Public Property StepBytes As Integer
             Get
-                Return _StepBytes
+                Return _stepBytes
             End Get
             Set
-                _StepBytes = Value
+                _stepBytes = Value
             End Set
         End Property
 
@@ -85,10 +85,10 @@ Namespace Encryption
         ''' </summary>
         Public Property StepBits As Integer
             Get
-                Return _StepBytes*8
+                Return _stepBytes*8
             End Get
             Set
-                _StepBytes = Value\8
+                _stepBytes = Value\8
             End Set
         End Property
 
@@ -97,10 +97,10 @@ Namespace Encryption
         ''' </summary>
         Public Property MinBytes As Integer
             Get
-                Return _MinBytes
+                Return _minBytes
             End Get
             Set
-                _MinBytes = Value
+                _minBytes = Value
             End Set
         End Property
 
@@ -109,10 +109,10 @@ Namespace Encryption
         ''' </summary>
         Public Property MinBits As Integer
             Get
-                Return _MinBytes*8
+                Return _minBytes*8
             End Get
             Set
-                _MinBytes = Value\8
+                _minBytes = Value\8
             End Set
         End Property
 
@@ -121,10 +121,10 @@ Namespace Encryption
         ''' </summary>
         Public Property MaxBytes As Integer
             Get
-                Return _MaxBytes
+                Return _maxBytes
             End Get
             Set
-                _MaxBytes = Value
+                _maxBytes = Value
             End Set
         End Property
 
@@ -133,10 +133,10 @@ Namespace Encryption
         ''' </summary>
         Public Property MaxBits As Integer
             Get
-                Return _MaxBytes*8
+                Return _maxBytes*8
             End Get
             Set
-                _MaxBytes = Value\8
+                _maxBytes = Value\8
             End Set
         End Property
 
@@ -146,16 +146,16 @@ Namespace Encryption
         ''' </summary>
         Public Property Bytes As Byte()
             Get
-                If _MaxBytes > 0 Then
-                    If _b.Length > _MaxBytes Then
-                        Dim b(_MaxBytes - 1) As Byte
+                If _maxBytes > 0 Then
+                    If _b.Length > _maxBytes Then
+                        Dim b(_maxBytes - 1) As Byte
                         Array.Copy(_b, b, b.Length)
                         _b = b
                     End If
                 End If
-                If _MinBytes > 0 Then
-                    If _b.Length < _MinBytes Then
-                        Dim b(_MinBytes - 1) As Byte
+                If _minBytes > 0 Then
+                    If _b.Length < _minBytes Then
+                        Dim b(_minBytes - 1) As Byte
                         Array.Copy(_b, b, _b.Length)
                         _b = b
                     End If
@@ -180,14 +180,14 @@ Namespace Encryption
                     '-- first null!
                     Dim i As Integer = Array.IndexOf(_b, CType(0, Byte))
                     If i >= 0 Then
-                        Return Me.Encoding.GetString(_b, 0, i)
+                        Return Encoding.GetString(_b, 0, i)
                     Else
-                        Return Me.Encoding.GetString(_b)
+                        Return Encoding.GetString(_b)
                     End If
                 End If
             End Get
             Set
-                _b = Me.Encoding.GetBytes(Value)
+                _b = Encoding.GetBytes(Value)
             End Set
         End Property
 
@@ -219,21 +219,21 @@ Namespace Encryption
         '''     Returns text representation of bytes using the default text encoding
         ''' </summary>
         Public Shadows Function ToString() As String
-            Return Me.Text
+            Return Text
         End Function
 
         ''' <summary>
         '''     returns Base64 string representation of this data
         ''' </summary>
         Public Function ToBase64() As String
-            Return Me.Base64
+            Return Base64
         End Function
 
         ''' <summary>
         '''     returns Hex string representation of this data
         ''' </summary>
         Public Function ToHex() As String
-            Return Me.Hex
+            Return Hex
         End Function
     End Class
 End NameSpace

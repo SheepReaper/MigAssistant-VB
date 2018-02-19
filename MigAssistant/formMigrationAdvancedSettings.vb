@@ -4,7 +4,7 @@ Public Class FormMigrationAdvancedSettings
     Private Sub btnAdvancedSettingsClose_Click(sender As Object, e As EventArgs) Handles btnAdvancedSettingsClose.Click
 
         ' Close Form
-        Me.Close()
+        Close()
     End Sub
 
     Private Sub form_Closing(sender As Object, e As CancelEventArgs) Handles MyBase.Closing
@@ -17,7 +17,7 @@ Public Class FormMigrationAdvancedSettings
 
         ' Stop the form from actually closing, and hide instead
         e.Cancel = True
-        Me.Hide()
+        Hide()
     End Sub
 
     Private Sub formMigrationAdvancedSettings_Load(sender As Object, e As EventArgs) _

@@ -7,18 +7,18 @@ Namespace Encryption
     '''     Both parties (encryptor and decryptor) must share the same secret key.
     ''' </summary>
     Public Class Symmetric
-        Private Const _DefaultIntializationVector As String = "%1Az=-@qT"
-        Private Const _BufferSize As Integer = 2048
+        Private Const DefaultIntializationVector As String = "%1Az=-@qT"
+        Private Const BufferSize As Integer = 2048
 
         Public Enum Provider
             ''' <summary>
             '''     The Data Encryption Standard provider supports a 64 bit key only
             ''' </summary>
-            DES
+            Des
             ''' <summary>
             '''     The Rivest Cipher 2 provider supports keys ranging from 40 to 128 bits, default is 128 bits
             ''' </summary>
-            RC2
+            Rc2
             ''' <summary>
             '''     The Rijndael (also known as AES) provider supports keys of 128, 192, or 256 bits with a default of 256 bits
             ''' </summary>
@@ -26,40 +26,40 @@ Namespace Encryption
             ''' <summary>
             '''     The TripleDES provider (also known as 3DES) supports keys of 128 or 192 bits with a default of 192 bits
             ''' </summary>
-            TripleDES
+            TripleDes
         End Enum
 
-        Private _data As Data
+        'Private _data As Data
         Private _key As Data
         Private _iv As Data
         Private ReadOnly _crypto As SymmetricAlgorithm
-        Private _EncryptedBytes As Byte()
-        Private _UseDefaultInitializationVector As Boolean
+        'Private _encryptedBytes As Byte()
+        'Private _useDefaultInitializationVector As Boolean
 
-        Private Sub New()
-        End Sub
+        'Private Sub New()
+        'End Sub
 
         ''' <summary>
         '''     Instantiates a new symmetric encryption object using the specified provider.
         ''' </summary>
         Public Sub New(provider As Provider, Optional ByVal useDefaultInitializationVector As Boolean = True)
             Select Case provider
-                Case provider.DES
+                Case Provider.Des
                     _crypto = New DESCryptoServiceProvider
-                Case provider.RC2
+                Case Provider.Rc2
                     _crypto = New RC2CryptoServiceProvider
-                Case provider.Rijndael
+                Case Provider.Rijndael
                     _crypto = New RijndaelManaged
-                Case provider.TripleDES
+                Case Provider.TripleDes
                     _crypto = New TripleDESCryptoServiceProvider
             End Select
 
             '-- make sure key and IV are always set, no matter what
-            Me.Key = RandomKey()
+            Key = RandomKey()
             If useDefaultInitializationVector Then
-                Me.IntializationVector = New Data(_DefaultIntializationVector)
+                IntializationVector = New Data(DefaultIntializationVector)
             Else
-                Me.IntializationVector = RandomInitializationVector()
+                IntializationVector = RandomInitializationVector()
             End If
         End Sub
 
@@ -167,8 +167,8 @@ Namespace Encryption
         ''' <summary>
         '''     Encrypts the specified Data using provided key
         ''' </summary>
-        Public Function Encrypt(d As Data, key As Data) As Data
-            Me.Key = key
+        Public Function Encrypt(d As Data, newkey As Data) As Data
+            Key = newkey
             Return Encrypt(d)
         End Function
 
@@ -191,17 +191,17 @@ Namespace Encryption
         ''' <summary>
         '''     Encrypts the stream to memory using provided key and provided initialization vector
         ''' </summary>
-        Public Function Encrypt(s As Stream, key As Data, iv As Data) As Data
-            Me.IntializationVector = iv
-            Me.Key = key
+        Public Function Encrypt(s As Stream, newKey As Data, iv As Data) As Data
+            IntializationVector = iv
+            Key = newKey
             Return Encrypt(s)
         End Function
 
         ''' <summary>
         '''     Encrypts the stream to memory using specified key
         ''' </summary>
-        Public Function Encrypt(s As Stream, key As Data) As Data
-            Me.Key = key
+        Public Function Encrypt(s As Stream, newKey As Data) As Data
+            Key = newKey
             Return Encrypt(s)
         End Function
 
@@ -210,16 +210,16 @@ Namespace Encryption
         ''' </summary>
         Public Function Encrypt(s As Stream) As Data
             Dim ms As New MemoryStream
-            Dim b(_BufferSize) As Byte
+            Dim b(BufferSize) As Byte
             Dim i As Integer
 
             ValidateKeyAndIv(True)
 
             Dim cs As New CryptoStream(ms, _crypto.CreateEncryptor(), CryptoStreamMode.Write)
-            i = s.Read(b, 0, _BufferSize)
+            i = s.Read(b, 0, BufferSize)
             Do While i > 0
                 cs.Write(b, 0, i)
-                i = s.Read(b, 0, _BufferSize)
+                i = s.Read(b, 0, BufferSize)
             Loop
 
             cs.Close()
@@ -231,16 +231,16 @@ Namespace Encryption
         ''' <summary>
         '''     Decrypts the specified data using provided key and preset initialization vector
         ''' </summary>
-        Public Function Decrypt(encryptedData As Data, key As Data) As Data
-            Me.Key = key
+        Public Function Decrypt(encryptedData As Data, newKey As Data) As Data
+            Key = newKey
             Return Decrypt(encryptedData)
         End Function
 
         ''' <summary>
         '''     Decrypts the specified stream using provided key and preset initialization vector
         ''' </summary>
-        Public Function Decrypt(encryptedStream As Stream, key As Data) As Data
-            Me.Key = key
+        Public Function Decrypt(encryptedStream As Stream, newKey As Data) As Data
+            Key = newKey
             Return Decrypt(encryptedStream)
         End Function
 
@@ -249,18 +249,18 @@ Namespace Encryption
         ''' </summary>
         Public Function Decrypt(encryptedStream As Stream) As Data
             Dim ms As New MemoryStream
-            Dim b(_BufferSize) As Byte
+            Dim b(BufferSize) As Byte
 
             ValidateKeyAndIv(False)
             Dim cs As New CryptoStream(encryptedStream,
                                        _crypto.CreateDecryptor(), CryptoStreamMode.Read)
 
             Dim i As Integer
-            i = cs.Read(b, 0, _BufferSize)
+            i = cs.Read(b, 0, BufferSize)
 
             Do While i > 0
                 ms.Write(b, 0, i)
-                i = cs.Read(b, 0, _BufferSize)
+                i = cs.Read(b, 0, BufferSize)
             Loop
             cs.Close()
             ms.Close()

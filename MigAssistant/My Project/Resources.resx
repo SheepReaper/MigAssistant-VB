@@ -340,4 +340,25 @@
   <data name="appBuild" xml:space="preserve">
     <value>1.10</value>
   </data>
+  <data name="Elipses" xml:space="preserve">
+    <value>...</value>
+  </data>
+  <data name="LabelMigrationCancelled" xml:space="preserve">
+    <value>Migration Cancelled</value>
+  </data>
+  <data name="LabelStartButton" xml:space="preserve">
+    <value>&amp;Start</value>
+  </data>
+  <data name="StatusLabelEmailingResults" xml:space="preserve">
+    <value>Emailing Results...</value>
+  </data>
+  <data name="LabelStopButton" xml:space="preserve">
+    <value>&amp;Stop</value>
+  </data>
+  <data name="StatusLabelInitializing" xml:space="preserve">
+    <value>Initialising...</value>
+  </data>
+  <data name="StatusLabelSearching" xml:space="preserve">
+    <value>Searching...</value>
+  </data>
 </root>

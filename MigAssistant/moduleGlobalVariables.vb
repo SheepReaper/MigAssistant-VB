@@ -38,7 +38,7 @@ Module ModuleGlobalVariables
 
     Public _
         StrEnvUserName As String = Replace(My.User.CurrentPrincipal.Identity.Name, Environment.UserDomainName & "\", "",
-                                            , , CompareMethod.Text)
+                                           , , CompareMethod.Text)
 
     Public StrEnvComputerName As String = My.Computer.Name
 
